@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados Gerais - Supersonic</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dados_gerais.css') }}">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    
+
+    <style>
+
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo-container">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="sidebar-img">
+        </div>
+        <div class="search-container">
+            <input type="text" id="inputBuscaMenu" placeholder="Pesquise no menu...">
+        </div>
+
+          <!--Menu de navegação com a url do Flask-->
+        <nav class="nav-menu">
+            <a href="{{ url_for('painel') }}" class="nav-item"><i data-lucide="home" size="18"></i> Início</a>
+            <a href="{{ url_for('dados_gerais') }}" class="nav-item active"><i data-lucide="layout-dashboard" size="18"></i> Dados Gerais</a>
+            <a href="{{ url_for('requerimento') }}" class="nav-item"><i data-lucide="toolbox" size="18"></i> Abrir Requerimento</a>
+            <a href="{{ url_for('req.lista') }}" class="nav-item"><i data-lucide="clipboard-list" size="18"></i> Requerimentos</a>
+            <a href="{{ url_for('comprovante') }}" class="nav-item"><i data-lucide="file-clock" size="18"></i> Histórico</a>
+            <a href="{{ url_for('perfil') }}" class="nav-item"><i data-lucide="user" size="18"></i> Perfil</a>
+        </nav>
+
+
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('sair') }}" class="nav-item"><i data-lucide="log-out" size="18"></i> Sair</a>
+        </div>
+
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <i data-lucide="menu" onclick="toggleSidebar()" style="cursor: pointer;"></i>
+                <span style="font-weight: 600; color: var(--azul-noite);">Filtros de Dados Gerais</span>
+            </div>
+            
+            <!--INÍCIO CONTA DA ATENDENTE-->
+            <div class="user-profile-container" onclick="toggleProfile()">
+    
+                <div class="user-info">
+                    <span class="user-name-top">{{ current_user.nome }}</span>
+                    <span class="user-role">Atendente</span>
+                </div>
+            
+                <div class="user-avatar">
+    {% set nomes = current_user.nome.split(' ') %}
+    {{ nomes[0][0] | upper }}{{ nomes[-1][0] | upper }}
+</div>
+            
+                <div class="profile-dropdown" id="profile-menu">
+                    <div class="profile-info-details" style="padding: 5px;">
+                        
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="mail" style="width: 14px; color: #14B1E7;"></i>
+                            <span>{{ current_user.email | upper }}</span>
+                        </div>
+                
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="user" style="width: 14px; color: #14B1E7;"></i>
+                            <span>LOGIN: 
+                                {% if current_user.usu_rod %}
+                                    {{ current_user.usu_rod[0].resp | upper }}
+                                {% else %}
+                                    {{ current_user.nome | upper }}
+                                {% endif %}
+                            </span>
+                        </div>
+                
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="phone" style="width: 14px; color: #14B1E7;"></i>
+                            <span>{{ (current_user.telefone or 'Sem telefone') | upper }}</span>
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                         
+                    <a href="{{ url_for('sair') }}" 
+                       style="color: #dc3545; font-weight: 600;">
+                       Sair do Sistema
+                    </a>
+                </div>
+            </div>
+            <!--FIM CONTA DA ATENDENTE-->
+            <!--Filtros-->
+        </header>
+       
+        
+  
+        <main class="content-area">
+            <div class="spreadsheet-container">
+                <form action="{{ url_for('dados_gerais') }}" method="GET" id="formFiltros" style="width: 100%;">
+                    
+                    <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; align-items: center;">
+                        
+                        <button type="submit" style="background: #1e293b; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Pesquisar
+                        </button>
+        
+                        <button type="button" onclick="adicionarLinhaFiltro()" 
+                        style="background: #ffffff; 
+                               color: #1e293b; 
+                               border: 1px solid #cbd5e1; 
+                               padding: 6px 14px; 
+                               border-radius: 6px; 
+                               cursor: pointer; 
+                               font-weight: 750; 
+                               font-size: 12px; 
+                               display: flex; 
+                               align-items: center; 
+                               gap: 6px; 
+                               height: 40px; 
+                               transition: all 0.2s;">
+                        <i data-lucide="filter" size="14"></i> + Filtro Específico
+                    </button>
+        
+                        <div style="position: relative; flex-grow: 1;">
+                            <i data-lucide="search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 16px;"></i>
+                            <input type="text" name="pesquisa_geral" id="inputPesquisa" 
+                                   placeholder="Busca global rápida..." 
+                                   value="{{ request.args.get('pesquisa_geral', '') }}"
+                                   style="width: 100%; padding: 12px 12px 12px 45px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        </div>
+        
+                        <div style="color: #64748b; font-size: 13px; font-weight: 550; white-space: nowrap;">
+                            <span id="contadorLinhas">{{ dados|length if dados else 0 }}</span> registros
+                        </div>
+                    </div> <div id="container-filtros-avancados" style="padding: 0 20px; background: #f1f5f9; display: block;">
+                        </div>
+        
+                </form> </div>
+        
+                
+
+
+                <div class="table-wrapper">
+                    {% if dados and dados|length > 0 %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo do documento</th>
+                                <th>Código do pagador</th>
+                                <th>Pagador</th>
+                                <th>Raiz do CNPJ</th>
+                                <th>Nome do motorista</th>
+                                <th>Telefone do motorista</th>
+                                <th>Cavalo</th>
+                                <th>Frota</th>
+                                <th>Placa</th>
+                                <th>Chave do manifesto</th>
+                                <th>Data</th>
+                                <th>Código do conhecimento</th>
+                                <th>Chave do conhecimento</th>
+                                <th>Série da nota</th>
+                                <th>Número da nota</th>
+                                <th>Chave da nota</th>
+                                <th>Data da nota fiscal</th>
+                                <th>Quantidade</th>
+                                <th>M³(metragem cúbica)</th>
+                                <th>Peso calculado</th>
+                                <th>Valor da mercadoria</th>
+                                <th>Nome do remetente</th>
+                                <th>CPF/CNPJ do remetente</th>
+                                <th>Código do destinatário</th>
+                                <th>Nome do destinatário</th>
+                                <th>CPF/CNPJ do destinatário</th>
+                                <th>Código do município</th>
+                                <th>Município do destinatário</th>
+                                <th>Região do destinatário</th>
+                                <th>Terminal de entrega</th>
+                                <th>Município do terminal</th>
+                                <th>Nome do redespacho</th>
+                                <th>Município do redespacho</th>
+                                <th>Última ocorrência</th>
+                                <th>Atendente</th>
+                                <th>Informação do palete</th>
+                                <th>Frete</th>
+                                <th>Modalidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in dados %}
+                            <tr>
+                                <td>{{ item.TIPO or '' }}</td>
+                                <td>{{ item.CODPAG or '' }}</td>
+                                <td>{{ item.DESPAG or '' }}</td>
+                                <td>{{ item.RAIZ  or ''}}</td>
+                                <td>{{ item.NOME_MOTORISTA or '' }}</td>
+                                <td>{{ item.TELEFONE_MOTORISTA or '' }}</td>
+                                <td>{{ item.CAVALO or '' }}</td>
+                                <td>{{ item.FROTA or '' }}</td>
+                                <td>{{ item.PLACA_CAR or ''}}</td>
+                                <td>{{ item.CHAVE_MAN or ''}}</td>
+                                <td>{{ item.DATCAD  or ''}}</td>
+                                <td>{{ item.CODCON or ''}}</td>
+                                <td>{{ item.CHAVE_CON or '' }}</td>
+                                <td>{{ item.SERIEN or '' }}</td>
+                                <td>{{ item.NOTFIS  or ''}}</td>
+                                <td>{{ item.NOTNFE or ''}}</td>
+                                <td>{{ item.DATNOT  or ''}}</td>
+                                <td>{{ item.QUANTI or ''}}</td>
+                                <td>{{ item.PESCUB or '' }}</td>
+                                <td>{{ item.PESCAL or ''}}</td>
+                                <td>{{ item.VLRMER or '' }}</td>
+                                <td>{{ item.DESREM or ''}}</td>
+                                <td>{{ item.CPF_CNPJ_REM or '' }}</td>
+                                <td>{{ item.CODDEST or ''}}</td>
+                                <td> {{ item.DESDES or ''}}</td>
+                                <td>{{ item.CPF_CNPJ_DEST or '' }}</td>
+                                <td>{{ item.CODMUN  or ''}}</td>
+                                <td>{{ item.MDEST  or ''}}</td>
+                                <td>{{ item.REGDES or ''}}</td>
+                                <td>{{ item.DESENT or ''}}</td>
+                                <td>{{ item.MENT or ''}}</td>
+                                <td>{{ item.DESRED or ''}}</td>
+                                <td>{{ item.MRED or ''}}</td>
+                                <td>{{ item.ULTOCO or ''}}</td>
+                                <td>{{ item.RESPONSAVEL_SAC or '' }}</td>
+                                <td>{{ item.OBSPLT or '' }}</td>
+                                <td>{{ item.TOTFRE or '' }}</td>
+                                <td>{{ item.MODALIDADE or '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p style="padding: 20px; color: #e7eaee;">Nenhum dado encontrado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+    <template id="template-filtro">
+        <div class="linha-filtro" style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px dotted #cbd5e1;">
+            <button type="button" onclick="this.parentElement.remove()" 
+                    style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; border-radius: 6px; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="trash-2" size="16"></i>
+            </button>
+            
+            <!-- Campo único com datalist: digita e escolhe a coluna, o value enviado é o código (RAIZ, CODPAG, etc.) -->
+            <input list="lista-colunas" name="campo_filtro[]" class="input-coluna-filtro"
+               placeholder="QUAL COLUNA?" 
+               style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 260px; text-transform: uppercase;">
+
+            <input type="text" name="valor_filtro[]" class="input-valor-filtro" 
+                placeholder="O QUE BUSCA NELA?" 
+                style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+    </template>
+
+    <!-- Lista de colunas usada pelo datalist (mostra só o nome "bonito") -->
+    <datalist id="lista-colunas">
+        <option value="TIPO DO DOCUMENTO"></option>
+        <option value="CÓDIGO DO PAGADOR"></option>
+        <option value="DESCRIÇÃO DO PAGADOR"></option>
+        <option value="PAGADOR"></option>
+        <option value="RAIZ DO CNPJ"></option>
+        <option value="NOME DO MOTORISTA"></option>
+        <option value="TELEFONE DO MOTORISTA"></option>
+        <option value="CAVALO"></option>
+        <option value="FROTA"></option>
+        <option value="PLACA"></option>
+        <option value="CHAVE DO MANIFESTO"></option>
+        <option value="DATA"></option>
+        <option value="CÓDIGO DO CONHECIMENTO"></option>
+        <option value="CHAVE DO CONHECIMENTO"></option>
+        <option value="SÉRIE DA NOTA"></option>
+        <option value="NÚMERO DA NOTA"></option>
+        <option value="CHAVE DA NOTA"></option>
+        <option value="DATA DA NOTA FISCAL"></option>
+        <option value="QUANTIDADE"></option>
+        <option value="M³(metragem cúbica)"></option>
+        <option value="PESO CALCULADO"></option>
+        <option value="VALOR DA MERCADORIA"></option>
+        <option value="NOME DO REMETENTE"></option>
+        <option value="CPF/CNPJ DO REMETENTE"></option>
+        <option value="CÓDIGO DO DESTINATÁRIO"></option>
+        <option value="NOME DO DESTINATÁRIO"></option>
+        <option value="CPF/CNPJ DO DESTINATÁRIO"></option>
+        <option value="CÓDIGO DO MUNICÍPIO"></option>
+        <option value="MUNICÍPIO DO DESTINATÁRIO"></option>
+        <option value="REGIÃO DO DESTINATÁRIO"></option>
+        <option value="TERMINAL DE ENTREGA"></option>
+        <option value="MUNICÍPIO DO TERMINAL"></option>
+        <option value="NOME DO REDESPACHO"></option>
+        <option value="MUNICÍPIO DO REDESPACHO"></option>
+        <option value="ÚLTIMA OCORRÊNCIA"></option>
+        <option value="ATENDENTE"></option>
+        <option value="INFORMAÇÃO DO PALETE"></option>
+        <option value="FRETE"></option>
+        <option value="MODALIDADE"></option>
+    </datalist>
+
+    <script src="{{ url_for('static', filename='js/menu-filter.js') }}"></script>
+    <script>
+        lucide.createIcons();
+        function toggleProfile() { document.getElementById('profile-menu').classList.toggle('active'); }
+        function changeUser() {
+            const novo = prompt("Nome da Atendente:");
+            if(novo) {
+                document.getElementById('current-user').innerText = novo;
+                document.getElementById('user-logo').innerText = novo.split(" ").map(n => n[0]).join("").toUpperCase().substring(0,2);
+            }
+        }
+
+    
+    lucide.createIcons();
+
+    function toggleProfile() { 
+        document.getElementById('profile-menu').classList.toggle('active'); 
+    }
+
+    // Função que cria a nova linha e já "avisa" para o JS observar a digitação
+    function adicionarLinhaFiltro() {
+        const container = document.getElementById('container-filtros-avancados');
+        const template = document.getElementById('template-filtro');
+        if (template) {
+            const clone = template.content.cloneNode(true);
+            
+            // Adiciona evento para filtrar assim que digitar no novo campo
+            const inputValor = clone.querySelector('.input-valor-filtro');
+            const inputColuna = clone.querySelector('.input-coluna-filtro');
+            
+            inputValor.addEventListener('input', filtrarTabelaGeral);
+            inputColuna.addEventListener('input', filtrarTabelaGeral);
+            
+            container.appendChild(clone);
+            lucide.createIcons();
+        }
+    }
+
+    function filtrarTabelaGeral() {
+        const inputGlobal = document.getElementById('inputPesquisa');
+        const termoGlobal = inputGlobal.value.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const tabela = document.querySelector(".data-table");
+        if (!tabela) return;
+        
+        const linhas = tabela.querySelectorAll("tbody tr");
+        const cabecalhos = Array.from(tabela.querySelectorAll("thead th")).map(th => th.innerText.toUpperCase().trim());
+        const contador = document.getElementById('contadorLinhas');
+
+        // Captura todos os filtros específicos preenchidos
+        const filtrosAtivos = Array.from(document.querySelectorAll('.linha-filtro')).map(linha => {
+            return {
+                coluna: linha.querySelector('.input-coluna-filtro').value.toUpperCase().trim(),
+                valor: linha.querySelector('.input-valor-filtro').value.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()
+            };
+        }).filter(f => f.valor !== "" && f.coluna !== "");
+
+        let totalVisiveis = 0;
+
+        linhas.forEach(linha => {
+            const textoCompletoLinha = linha.textContent.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const celulas = linha.querySelectorAll("td");
+
+            // Critério 1: Busca Global
+            const passaGlobal = textoCompletoLinha.indexOf(termoGlobal) > -1;
+
+            // Critério 2: Filtros Específicos
+            let passaEspecíficos = true;
+            filtrosAtivos.forEach(f => {
+                const indexColuna = cabecalhos.indexOf(f.coluna);
+                if (indexColuna > -1 && celulas[indexColuna]) {
+                    const textoCelula = celulas[indexColuna].textContent.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (textoCelula.indexOf(f.valor) === -1) {
+                        passaEspecíficos = false;
+                    }
+                }
+            });
+
+            if (passaGlobal && passaEspecíficos) {
+                linha.style.display = "";
+                totalVisiveis++;
+            } else {
+                linha.style.display = "none";
+            }
+        });
+
+        if (contador) contador.innerText = totalVisiveis;
+    }
+
+    // Ativa a busca global
+    document.getElementById('inputPesquisa').addEventListener('input', filtrarTabelaGeral);
+    </script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Supersonic - Torre de Controle</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mapaboard.css') }}">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="page-mapa {{ 'tv-mode' if user_type == 'TV' }}">
+
+<script>
+    if (new URLSearchParams(window.location.search).get('tv') === '1') {
+        document.body.classList.add('tv-mode');
+    }
+</script>
+
+<div class="dashboard-container">
+    <aside class="side-panel">
+
+        <div class="chart-section">
+            <span class="chart-label">SITUAÇÃO DAS ENTREGAS</span>
+            <div class="canvas-holder">
+                <canvas id="chartStatus"></canvas>
+                <div class="chart-inner-text">
+                    <span id="perc-concluido">0%</span>
+                    <small>CONCLUÍDO</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <span class="chart-label">VEÍCULOS POR REGIÃO</span>
+            <div class="canvas-holder-regiao">
+                <canvas id="chartRegiao"></canvas>
+            </div>
+        </div>
+
+        <div class="kpi-group">
+            <div class="kpi-box" style="border-left: 4px solid #22c55e;">
+                <small>NOTAS ENTREGUES</small>
+                <div id="kpi-entregues">0</div>
+            </div>
+            <div class="kpi-box" style="border-left: 4px solid #00ecff;">
+                <small>NOTAS EM ROTA</small>
+                <div id="kpi-pendentes">0</div>
+            </div>
+        </div>
+
+    </aside>
+
+    <main id="mapa-full"></main>
+
+    <div class="map-legend">
+        <div class="legend-item">
+            <img src="/static/img/caminhao_verde.png" alt="Concluído"> 
+            <span><strong>100% Concluído</strong> (Estado finalizado)</span>
+        </div>
+        <div class="legend-item">
+            <img src="/static/img/caminhao_azulturquesa.png" alt="Em Rota"> 
+            <span><strong>Até 150 Notas</strong> (Baixa densidade)</span>
+        </div>
+        <div class="legend-item">
+            <img src="/static/img/caminhao_azul.png" alt="Em Rota"> 
+            <span><strong>150 a 500 Notas</strong> (Média densidade)</span>
+        </div>
+        <div class="legend-item">
+            <img src="/static/img/caminhao_roxo.png" alt="Em Rota"> 
+            <span><strong>+500 Notas</strong> (Alta densidade)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mapa = L.map('mapa-full', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([-14.2350, -48.0000], 4.0);
+
+    // Agora sim, as configurações do painel de fundo (fora do L.map)
+    mapa.createPane('paneSiglas');
+    mapa.getPane('paneSiglas').style.zIndex = 400; 
+    mapa.getPane('paneSiglas').style.pointerEvents = 'none';
+       
+    fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: '#14B1E7',
+                    weight: 0.7,
+                    fillColor: '#fff',
+                    fillOpacity: 0.03,
+                },
+                onEachFeature: function (feature, layer) {
+                    const sigla = feature.properties.sigla || feature.properties.id;
+                    if (sigla) {
+                        layer.bindTooltip(sigla, {
+                            permanent: true,
+                            direction: 'center',
+                            className: 'label-sigla',
+                            pane: 'paneSiglas'
+                        }).openTooltip();
+                    }
+                }
+            }).addTo(mapa);
+        });
+
+    let camadaEstados = L.layerGroup().addTo(mapa);
+
+    const coordenadasEstados = {
+    'SP': { pos: [-22.029045, -48.895324], busca: ['SP'] },
+    'RJ': { pos: [-22.497380, -43.114079], busca: ['RJ'] },
+    'MG': { pos: [-18.458690, -44.534816], busca: ['MG',] },
+    'BA': { pos: [-11.647369, -42.095888], busca: ['BA'] },
+    'PR': { pos: [-24.80, -51.50], busca: ['PR'] },
+    'RS': { pos: [-29.50, -53.50], busca: ['RS'] },
+    'SC': { pos: [-27.495664, -49.560486], busca: ['SC'] },
+    'GO': { pos: [-17.086324, -51.297298], busca: ['GO'] },
+    'MT': { pos: [-12.80, -55.80], busca: ['MT'] },
+    'MS': { pos: [-20.30, -54.50], busca: ['MS'] },
+    'DF': { pos: [-15.78, -47.85], busca: ['DF'] },
+    'ES': { pos: [-19.50, -40.30], busca: ['ES'] },
+    'PA': { pos: [-3.80,  -52.50], busca: ['PA'] },
+    'AM': { pos: [-4.449906, -67.192068], busca: ['AM'] },
+    'CE': { pos: [-5.00,  -39.50], busca: ['CE'] },
+    'MA': { pos: [-5.00,  -45.00], busca: ['MA',] },
+    'RR': { pos: [2.415529,  -61.455548], busca: ['RR'] },
+    'AP': { pos: [1.417469,  -51.989976], busca: ['AP'] },
+    'AC': { pos: [-9.384304, -70.460670], busca: ['AC'] },
+    'RO': { pos: [-10.725513,  -62.987269], busca: ['RO'] },
+    'PI': { pos: [-7.718681,  -42.772473], busca: ['PI'] },
+    'TO': { pos: [-10.428250,  -48.329044], busca: ['TO'] },
+    'RN': { pos: [-5.822192,  -36.742737], busca: ['RN'] },
+    'PB': { pos: [-7.155303,  -35.505954], busca: ['PB'] },
+    'PE': { pos: [-8.222072,  -39.154107], busca: ['PE'] },
+    'AL': { pos: [-9.665306,  -36.252415], busca: ['AL'] },
+    'SE': { pos: [-10.976546,  -37.428883], busca: ['SE'] }
+
+    
+};
+
+    window.addEventListener('resize', function () {
+        if (mapa) {
+            mapa.invalidateSize(true);
+        }
+    });
+
+    async function gerenciarDados() {
+        try {
+            const response = await fetch("{{ url_for('storage_file', filename='dados_completos.json') }}", {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const dados = await response.json();
+
+            atualizarKPIs(dados);
+            atualizarGraficos(dados);
+            atualizarStatusEntregas(dados);
+
+            if (typeof camadaEstados !== 'undefined') {
+                camadaEstados.clearLayers();
+                const resumo = {};
+
+                dados.forEach(item => {
+                    let idveiculos = null;
+                    if (item.CAVALO) {
+                        idveiculos = item.PLACA_CAR
+                            ? `C:${item.CAVALO}_P:${item.PLACA_CAR}`
+                            : `C:${item.CAVALO}`;
+                    }
+
+                    const r = (item.MDEST || "").toUpperCase();
+                    const ufIdentificada = Object.keys(coordenadasEstados).find(sigla =>
+                        r.includes(sigla) || coordenadasEstados[sigla].busca.some(termo => r.includes(termo))
+                    );
+
+                    if (!ufIdentificada) return;
+
+                    if (!resumo[ufIdentificada]) {
+                        resumo[ufIdentificada] = {
+                            total: 0,
+                            entregues: 0,
+                            veiculosVistos: new Set(),
+                            somaLat: 0,
+                            somaLong: 0,
+                            contCoord: 0
+                        };
+                    }
+
+                    const lat = parseFloat(item.LAT);
+                    const lng = parseFloat(item.LONG);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        resumo[ufIdentificada].somaLat += lat;
+                        resumo[ufIdentificada].somaLong += lng;
+                        resumo[ufIdentificada].contCoord++;
+                    }
+
+                    const statusBruto = (item.ULTOCO || "").toUpperCase().trim();
+                    const termosFinalizados = [
+                        "FINALIZADORA DE CANHOTO",
+                        "MERCADORIA ENTREGUE AO CLIENTE",
+                        "ENTREGA REALIZADA NORMALMENTE"
+                    ];
+                    const notaConcluida = termosFinalizados.some(termo => statusBruto.includes(termo));
+
+                    resumo[ufIdentificada].total++;
+
+                    if (idveiculos) {
+                        resumo[ufIdentificada].veiculosVistos.add(idveiculos);
+                    }
+
+                    if (notaConcluida) {
+                        resumo[ufIdentificada].entregues++;
+                    }
+                });
+
+                // Desenha os caminhões
+                for (let uf in resumo) {
+                    const info = resumo[uf];
+                    const estadoConfig = coordenadasEstados[uf];
+                    if (!estadoConfig) continue;
+
+                    const latBase = estadoConfig.pos[0];
+                    const lngBase = estadoConfig.pos[1];
+
+                    // Offset pequeno — ambos ancoram no centro do ícone agora
+                    let offsetLat = 1.0;
+                    let offsetLng = 0.0;
+                    // 
+
+                    if (uf === 'SP') {
+                        offsetLat = 0.5;
+                        offsetLng = -0.5;
+                    } else if (uf === 'RJ') {
+                        offsetLat = 0.5;
+                        offsetLng = -0.5;
+                    } else if (uf === 'SC') {
+                        offsetLat = 0.5;
+                        offsetLng = -0.5;
+                    } else if (uf === 'AC') {
+                        offsetLat = 0.5;
+                        offsetLng = -1.5;
+                    } else if (uf === 'RN') {
+                        offsetLat = 0.4;
+                    } else if (uf === 'AM' || uf === 'PA' || uf === 'MT') {
+                        offsetLat = 1.5;
+                    }
+
+                    // Verde acima, Rota abaixo
+                    const posVerde = [latBase + offsetLat, lngBase + offsetLng];
+                    const posRota  = [latBase - offsetLat, lngBase - offsetLng];
+
+                    // --- CAMINHÃO VERDE (ENTREGUES) ---
+                    if (info.entregues > 0) {
+                        const tamVerde = info.entregues <= 150 ? 55 : info.entregues <= 500 ? 65 : 80;
+                        const iconeVerde = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                                <div style="position: relative; display: flex; justify-content: center; align-items: center; width: ${tamVerde}px; height: ${tamVerde}px;">
+        <img src="/static/img/caminhao_verde.png" style="width:100%; filter:drop-shadow(2px 2px 3px rgba(0,0,0,0.4));">
+        <div style="position: absolute; 
+                    top: 48%; 
+                    left: 45%; 
+                    transform: translate(-50%, -50%); 
+                    color: #fff; 
+                    font-weight: 900; 
+                    font-size: 11px; 
+                    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; 
+                    pointer-events: none;">
+            ${info.entregues}
+        </div>
+    </div>`,
+                            iconSize: [tamVerde, tamVerde],
+                            iconAnchor: [tamVerde / 2, tamVerde / 2]
+                        });
+                        L.marker(posVerde, { icon: iconeVerde, zIndexOffset: 1000 }).addTo(camadaEstados);
+                    }
+
+                    // --- CAMINHÃO ROTA (PENDENTES) ---
+                    const saldoPendentes = info.total - info.entregues;
+                    if (saldoPendentes > 0) {
+                        let imgUrl;
+                        if (saldoPendentes <= 150) imgUrl = "/static/img/caminhao_azulturquesa.png";
+                        else if (saldoPendentes <= 500) imgUrl = "/static/img/caminhao_azul.png";
+                        else imgUrl = "/static/img/caminhao_roxo.png";
+
+                        const tamRota = saldoPendentes <= 150 ? 55 : saldoPendentes <= 500 ? 65 : 80;
+
+                        const iconeRota = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                            <div style="position: relative; display: flex; justify-content: center; align-items: center; width: ${tamRota}px; height: ${tamRota}px;">
+        <img src="${imgUrl}" style="width:100%; filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5));">
+        <div style="position: absolute; 
+                    top: 48%; 
+                    left: 42%; 
+                    transform: translate(-50%, -50%); 
+                    color: #fff; 
+                    font-weight: 900; 
+                    font-size: 12px; 
+                    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; 
+                    pointer-events: none;">
+            ${saldoPendentes}
+        </div>
+    </div>`,
+                            iconSize: [tamRota, tamRota],
+                            iconAnchor: [tamRota / 2, tamRota / 2]
+                        });
+                        L.marker(posRota, { icon: iconeRota, zIndexOffset: 500 }).addTo(camadaEstados);
+                    }
+                }
+            }
+
+        } catch(e) {
+            console.error("Erro geral no gerenciarDados:", e);
+        }
+    }
+
+    gerenciarDados();
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (mapa) {
+                mapa.invalidateSize(true);
+                console.log("invalidateSize executado após load.");
+            }
+        }, 1000);
+    });
+
+    setInterval(gerenciarDados, 300000);
+
+    // -------------------------------------------------------
+    // GRÁFICO DE ROSCA
+    // -------------------------------------------------------
+    function atualizarStatusEntregas(dados) {
+        try {
+            const canvas = document.getElementById('chartStatus');
+            if (!canvas) return;
+            const ctxStatus = canvas.getContext('2d');
+
+            const termosFinalizados = [
+                "FINALIZADORA DE CANHOTO",
+                "MERCADORIA ENTREGUE AO CLIENTE",
+                "ENTREGA REALIZADA NORMALMENTE"
+            ];
+
+            const concluidas = dados.filter(item => {
+                const status = (item.ULTOCO || "").toUpperCase().trim();
+                return termosFinalizados.some(termo => status.includes(termo));
+            }).length;
+
+            const emRota = dados.length - concluidas;
+            const perc = dados.length > 0 ? Math.round((concluidas / dados.length) * 100) : 0;
+
+            document.getElementById('perc-concluido').innerText = perc + "%";
+
+            if (window.chartStatus instanceof Chart) {
+                window.chartStatus.data.datasets[0].data = [concluidas, emRota];
+                window.chartStatus.update();
+            } else {
+                window.chartStatus = new Chart(ctxStatus, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Concluído', 'Em Rota'],
+                        datasets: [{
+                            data: [concluidas, emRota],
+                            backgroundColor: ['#22c55e', 'rgba(255, 255, 255, 0.1)'], 
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: false,           // DESATIVE o responsive para ele obedecer o tamanho fixo do CSS
+    maintainAspectRatio: true, 
+    cutout: '75%',               // Diminuir um pouco o cutout deixa a "linha" da bolinha mais grossa
+    plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false } // Opcional: TVs não usam mouse, pode desativar o tooltip
+    }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Erro no Gráfico de Status:", e);
+        }
+    }
+
+    // -------------------------------------------------------
+    // GRÁFICO DE BARRAS
+    // -------------------------------------------------------
+    function atualizarGraficos(dados) {
+        try {
+            const canvas = document.getElementById('chartRegiao');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            if (window.chartRegiao && typeof window.chartRegiao.destroy === 'function') {
+                window.chartRegiao.destroy();
+            }
+
+            const macroRegioes = {
+                "SUDESTE":      new Set(),
+                "SUL":          new Set(),
+                "NORDESTE":     new Set(),
+                "CENTRO-OESTE": new Set(),
+                "NORTE":        new Set()
+            };
+
+            dados.forEach(item => {
+                const r = (item.REGDES || "").toUpperCase();
+                const cavalo = (item.CAVALO || "").trim();
+                if (!cavalo) return;
+
+                if (r.includes("SP") || r.includes("PAULO") || r.includes("MG") || r.includes("RJ") || r.includes("ES")) {
+                    macroRegioes["SUDESTE"].add(cavalo);
+                } else if (r.includes("PR") || r.includes("SC") || r.includes("RS") || r.includes("SUL")) {
+                    macroRegioes["SUL"].add(cavalo);
+                } else if (r.includes("BA") || r.includes("PE") || r.includes("CE") || r.includes("NORDESTE")) {
+                    macroRegioes["NORDESTE"].add(cavalo);
+                } else if (r.includes("GO") || r.includes("MT") || r.includes("MS") || r.includes("DF")) {
+                    macroRegioes["CENTRO-OESTE"].add(cavalo);
+                } else if (r.includes("AM") || r.includes("PA") || r.includes("NORTE")) {
+                    macroRegioes["NORTE"].add(cavalo);
+                }
+            });
+
+            const labels = Object.keys(macroRegioes);
+            const valores = labels.map(reg => macroRegioes[reg].size);
+
+            window.chartRegiao = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: '#14B1E7',
+                        borderRadius: 5,
+                        barPercentage: 0.8
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { left: 10, right: 35, top: 0, bottom: 0 }
+                    },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false, beginAtZero: true },
+                        y: {
+                            ticks: {
+                                color: '#ffffff',
+                                font: { weight: 'bold', size: 10 },
+                                padding: 5
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    animation: {
+                        onComplete: function () {
+                            const chartInstance = this;
+                            const ctxAnim = chartInstance.ctx;
+                            ctxAnim.font = "bold 11px Arial";
+                            ctxAnim.fillStyle = "#ffffff";
+                            ctxAnim.textAlign = "left";
+                            ctxAnim.textBaseline = "middle";
+                            chartInstance.data.datasets.forEach((dataset, i) => {
+                                const meta = chartInstance.getDatasetMeta(i);
+                                meta.data.forEach((bar, index) => {
+                                    ctxAnim.fillText(dataset.data[index], bar.x + 5, bar.y);
+                                });
+                            });
+                        }
+                    }
+                }
+            });
+
+        } catch (erro) {
+            console.error("ERRO CRÍTICO NA ATUALIZAÇÃO DO GRÁFICO:", erro);
+        }
+    }
+
+    // -------------------------------------------------------
+    // KPIs
+    // -------------------------------------------------------
+    function atualizarKPIs(dados) {
+        try {
+            if (!dados || dados.length === 0) {
+                document.getElementById('kpi-entregues').innerText = "0";
+                document.getElementById('kpi-pendentes').innerText = "0";
+                return;
+            }
+
+            const termosFinalizados = [
+                "FINALIZADORA DE CANHOTO",
+                "MERCADORIA ENTREGUE AO CLIENTE",
+                "ENTREGA REALIZADA NORMALMENTE"
+            ];
+
+            const concluidas = dados.filter(item => {
+                const status = (item.ULTOCO || "").toUpperCase().trim();
+                return termosFinalizados.some(termo => status.includes(termo));
+            }).length;
+
+            const emRota = dados.length - concluidas;
+
+            document.getElementById('kpi-entregues').innerText = concluidas;
+            document.getElementById('kpi-pendentes').innerText = emRota;
+
+        } catch (err) {
+            console.error("Erro ao atualizar os KPIs:", err);
+        }
+    }
+</script>
+
+</body>
+</html>

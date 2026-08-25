@@ -1,0 +1,217 @@
+{% extends 'requerimentos/base.html' %}
+{% from 'components/ui.html' import status_badge, area_vazia, origem_dado with context %}
+
+{% block conteudo %}
+<div class="pagina-cabecalho">
+    <div>
+        <h1>Dados Gerais</h1>
+        <p>Consolidação de requerimentos, itens mais solicitados, fornecedores cotados e origem dos cadastros usados nos formulários.</p>
+    </div>
+    <div class="pagina-acoes">
+        <a href="{{ url_for('req.dashboard') }}" class="btn btn-neutro"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        <a href="{{ url_for('req.novo') }}" class="btn btn-primario"><i data-lucide="file-plus"></i> Abrir requerimento</a>
+    </div>
+</div>
+
+{{ origem_dado(catalogos) }}
+
+<div class="cartoes-indicadores">
+    <div class="indicador" style="--acento:#394F5A;">
+        <span class="icone"><i data-lucide="clipboard-list"></i></span>
+        <span class="dados">
+            <label>Requerimentos</label>
+            <span class="valor">{{ indicadores.total }}</span>
+        </span>
+    </div>
+    <div class="indicador" style="--acento:#14B1E7;">
+        <span class="icone"><i data-lucide="loader"></i></span>
+        <span class="dados">
+            <label>Em andamento</label>
+            <span class="valor">{{ indicadores.abertos }}</span>
+        </span>
+    </div>
+    <div class="indicador" style="--acento:#10b981;">
+        <span class="icone"><i data-lucide="circle-dollar-sign"></i></span>
+        <span class="dados">
+            <label>Valor estimado</label>
+            <span class="valor moeda">{{ indicadores.valor_total | moeda }}</span>
+        </span>
+    </div>
+    <div class="indicador" style="--acento:#6366f1;">
+        <span class="icone"><i data-lucide="layers"></i></span>
+        <span class="dados">
+            <label>Categorias com movimento</label>
+            <span class="valor">{{ indicadores.por_categoria | length }}</span>
+        </span>
+    </div>
+</div>
+
+<div class="grade-paineis">
+    <div class="cartao">
+        <div class="cartao-cabecalho">
+            <h3><i data-lucide="package"></i> Itens mais solicitados</h3>
+        </div>
+        {% if itens_top %}
+        <div class="tabela-wrapper">
+            <table class="tabela">
+                <thead>
+                    <tr><th>Produto / serviço</th><th class="numerico">Ocorrências</th><th class="numerico">Quantidade</th></tr>
+                </thead>
+                <tbody>
+                    {% for linha in itens_top %}
+                    <tr>
+                        <td class="celula-truncada" title="{{ linha.produto }}">{{ linha.produto }}</td>
+                        <td class="numerico">{{ linha.ocorrencias }}</td>
+                        <td class="numerico">{{ '%.2f' | format(linha.quantidade) | replace('.', ',') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            {{ area_vazia('package-open', 'Sem itens', 'Nenhum item foi solicitado até agora.') }}
+        {% endif %}
+    </div>
+
+    <div class="cartao">
+        <div class="cartao-cabecalho">
+            <h3><i data-lucide="truck"></i> Fornecedores cotados</h3>
+        </div>
+        {% if fornecedores %}
+        <div class="tabela-wrapper">
+            <table class="tabela">
+                <thead>
+                    <tr><th>Fornecedor</th><th class="numerico">Cotações</th><th class="numerico">Valor cotado</th></tr>
+                </thead>
+                <tbody>
+                    {% for linha in fornecedores %}
+                    <tr>
+                        <td class="celula-truncada" title="{{ linha.fornecedor }}">{{ linha.fornecedor }}</td>
+                        <td class="numerico">{{ linha.cotacoes }}</td>
+                        <td class="numerico">{{ linha.valor | moeda }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            {{ area_vazia('truck', 'Sem cotações', 'Nenhuma proposta de fornecedor registrada.') }}
+        {% endif %}
+    </div>
+
+    <div class="cartao">
+        <div class="cartao-cabecalho">
+            <h3><i data-lucide="layers"></i> Valor por categoria</h3>
+        </div>
+        {% if indicadores.por_categoria %}
+        <div class="tabela-wrapper">
+            <table class="tabela">
+                <thead>
+                    <tr><th>Categoria</th><th class="numerico">Requerimentos</th><th class="numerico">Valor estimado</th></tr>
+                </thead>
+                <tbody>
+                    {% for linha in indicadores.por_categoria %}
+                    <tr>
+                        <td class="celula-truncada">{{ linha.categoria }}</td>
+                        <td class="numerico">{{ linha.quantidade }}</td>
+                        <td class="numerico">{{ linha.valor | moeda }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            {{ area_vazia('layers', 'Sem categorias', 'Classifique os requerimentos para ver este resumo.') }}
+        {% endif %}
+    </div>
+
+    <div class="cartao">
+        <div class="cartao-cabecalho">
+            <h3><i data-lucide="map"></i> Filiais</h3>
+        </div>
+        {% if indicadores.por_filial %}
+        <div class="tabela-wrapper">
+            <table class="tabela">
+                <thead>
+                    <tr><th>Filial</th><th class="numerico">Requerimentos</th><th class="numerico">Valor estimado</th></tr>
+                </thead>
+                <tbody>
+                    {% for linha in indicadores.por_filial %}
+                    <tr>
+                        <td class="celula-truncada">{{ linha.filial }}</td>
+                        <td class="numerico">{{ linha.quantidade }}</td>
+                        <td class="numerico">{{ linha.valor | moeda }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            {{ area_vazia('map', 'Sem filiais', 'Nenhuma filial informada nos requerimentos.') }}
+        {% endif %}
+    </div>
+</div>
+
+<div class="cartao">
+    <div class="cartao-cabecalho">
+        <h3><i data-lucide="database"></i> Cadastros disponíveis para os formulários</h3>
+        <span class="cartao-nota">origem informada por cadastro — nenhum dado é inventado como real</span>
+    </div>
+    <div class="tabela-wrapper">
+        <table class="tabela">
+            <thead>
+                <tr><th>Cadastro</th><th>Origem</th><th class="numerico">Registros</th><th>Exemplos</th></tr>
+            </thead>
+            <tbody>
+                {% for nome, dados in catalogos.items() %}
+                <tr>
+                    <td>{{ nome | replace('_', ' ') | capitalize }}</td>
+                    <td>
+                        <span class="badge-status"
+                              style="--badge-cor: {{ '#10b981' if dados.origem == 'ERP' else ('#14B1E7' if dados.origem == 'JSON_INTEGRACAO' else '#f59e0b') }};">
+                            <i data-lucide="{{ 'database' if dados.origem == 'ERP' else ('file-json' if dados.origem == 'JSON_INTEGRACAO' else 'flask-conical') }}"></i>
+                            {{ dados.origem | replace('_', ' ') }}
+                        </span>
+                    </td>
+                    <td class="numerico">{{ dados.itens | length }}</td>
+                    <td class="celula-truncada">
+                        {{ dados.itens[:3] | map(attribute='descricao') | join(' · ') if dados.itens else '—' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="cartao">
+    <div class="cartao-cabecalho">
+        <h3><i data-lucide="clock"></i> Requerimentos recentes</h3>
+        <a class="cartao-link" href="{{ url_for('req.lista') }}">Ver todos</a>
+    </div>
+    {% if recentes %}
+    <div class="tabela-wrapper">
+        <table class="tabela">
+            <thead>
+                <tr><th>Código</th><th>Status</th><th>Solicitante</th><th>Setor</th>
+                    <th>Referência</th><th class="numerico">Valor</th></tr>
+            </thead>
+            <tbody>
+                {% for req in recentes %}
+                <tr>
+                    <td><a class="codigo" href="{{ url_for('req.detalhe', requerimento_id=req.id) }}">{{ req.codigo_exibicao }}</a></td>
+                    <td>{{ status_badge(req.status) }}</td>
+                    <td class="celula-truncada">{{ req.solicitante_nome or '—' }}</td>
+                    <td class="celula-truncada">{{ req.setor or '—' }}</td>
+                    <td>{{ req.data_referencia | data_br }}</td>
+                    <td class="numerico">{{ req.valor_estimado | moeda }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {{ area_vazia('inbox', 'Nada registrado', 'Abra o primeiro requerimento para alimentar esta página.') }}
+    {% endif %}
+</div>
+{% endblock %}

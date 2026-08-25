@@ -1,0 +1,396 @@
+/* ==========================================================================
+   ESTILO DA ABA DE COMPROVANTES (POD)
+   Focado em Usabilidade, Interface Administrativa e Feedback Visual
+   ========================================================================== */
+
+/* Container Principal - Ocupa a área de conteúdo à direita do menu */
+.comprovante-container {
+    padding: 24px;
+    background-color: #f8fafc; /* Cinza azulado bem claro para o fundo */
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Título da Seção - Com ícone alinhado */
+.comprovante-title {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   SEÇÃO DE FILTROS (Área de Busca)
+   -------------------------------------------------------------------------- */
+.filtros-wrapper {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;         /* Mudamos para Flex */
+    flex-wrap: wrap;       /* Permite quebra se for realmente necessário */
+    gap: 15px;             /* Reduzi o gap para ganhar espaço horizontal */
+    align-items: flex-end; 
+    margin-bottom: 30px;
+}
+
+/* Grupos de Input (Label + Campo) */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 150px;       /* Explicação: Cresce, encolhe e tenta ter 150px */
+    min-width: 0;          /* PERMITE ENCOLHER REALMENTE */
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input-group input {
+    width: 100%;           /* Garante que ocupe o espaço do grupo */
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 0.85rem;    /* Reduzi levemente a fonte para telas médias */
+    color: #4D4D4F;
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Efeito de Foco - Azul Supersonic */
+.input-group input:focus {
+    outline: none;
+    border-color: #14B1E7; /* Azul Dia da Supersonic */
+    box-shadow: 0 0 0 1px rgba(20, 177, 231, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   BOTÃO DE CONSULTA
+   -------------------------------------------------------------------------- */
+.btn-consultar {
+    background-color: #14B1E7;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    flex: 1;           /* <-- FAZ ESTICAR HORIZONTALMENTE JUNTOS */
+}
+
+.btn-consultar:hover:not(:disabled) {
+    background-color: #0f8fbc;
+    transform: translateY(-1px); /* Leve elevação no hover */
+}
+
+/* Estado Desabilitado (Durante a Busca) */
+.btn-consultar:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------
+   CARD DE RESULTADOS
+   -------------------------------------------------------------------------- */
+.resultado-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    /* Começa escondido, o JS altera para 'block' após a busca */
+    display: none; 
+}
+
+/* Cabeçalho do Resultado - Barra Cinza Superior */
+.resultado-header {
+    padding: 20px;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap; /* Garante que em telas pequenas os botões não quebrem */
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.info-entrega-container {
+    flex: 1;
+    min-width: 300px;
+}
+
+.header-principal {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.header-principal h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.2rem;
+}
+
+/* Badge de Autenticação Padrão (Cores mudam via JS) */
+.badge-autenticado {
+    background-color: #e6f7ed; /* Verde clarinho base */
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #c3e6cb;
+}
+
+/* Cores dinâmicas para o Status */
+.badge-sucesso { background-color: #e6f7ed; color: #166534; border-color: #c3e6cb; }
+.badge-alerta { background-color: #fffbeb; color: #92400e; border-color: #fde68a; }
+.badge-erro { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+
+/* Grid de Informações Detalhadas (Recebedor, Data, etc) */
+.grid-detalhes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.item-detalhe .label {
+    display: block;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.item-detalhe .valor {
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+.valor-chave {
+    font-family: 'Courier New', monospace; /* Fonte mono para códigos */
+    font-size: 0.8rem;
+    color: #64748b;
+    word-break: break-all; /* Evita que a chave estoure o card */
+}
+
+/* --------------------------------------------------------------------------
+   AÇÕES E VISUALIZADOR (Botões Salvar e Imprimir)
+   -------------------------------------------------------------------------- */
+.acoes-documento {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-download, .btn-imprimir {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.btn-download:hover, .btn-imprimir:hover {
+    background: #f8fafc;
+    border-color: #14B1E7;
+    color: #14B1E7;
+}
+
+/* Área do Iframe/PDF */
+.visualizador-pdf-container {
+    margin: 20px auto;
+    width: 95%;
+    max-width: 950px;
+    height: 400px !important;     /* <--- MUDE AQUI PARA 550px */
+    min-height: 400px !important; 
+    background-color: #525659;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#pdf-viewer {
+    width: 100%;
+    height: 100%; /* Ocupa todo o espaço do container pai */
+    border: none;
+    background-color: #525659;
+}
+
+/* Placeholder para erros ou buscas não iniciadas */
+.placeholder-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+    background-color: #525659; /* Deixa o fundo igual ao do visualizador */
+    height: 100%;             /* Ocupa a altura toda do container */
+}
+
+.placeholder-vazio i {
+    margin-bottom: 15px;
+    opacity: 0.8; /* Aumentei a opacidade para melhor contraste com as cores dinâmicas */
+}
+
+
+/* --------------------------------------------------------------------------
+   ORGANIZAÇÃO DOS BOTÕES DE FILTRO (Lado a Lado)
+   -------------------------------------------------------------------------- */
+   .acoes-filtro-container {
+    display: flex;
+    flex-wrap: wrap;       /* Se apertar, os botões descem sozinhos */
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    height: auto;          /* REMOVIDO OS 42PX FIXOS */
+    min-height: 42px;      /* Mantém o alinhamento visual com os inputs */
+    flex: 1.5 1 auto;      /* Dá mais prioridade de espaço para esta área */
+}
+
+.checkbox-container {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 10px;        /* Dá um respiro extra antes de começar os botões */
+    white-space: nowrap;    /* Impede que o texto 'Busca exata' quebre em duas linhas */
+}
+
+/* Estilo do botão Limpar */
+.btn-limpar {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;      /* <-- ALTURA TRAVADA (Não cresce para cima) */
+    padding: 0 20px;
+    flex: 1;           /* <-- FAZ ESTICAR HORIZONTALMENTE (Comprimento) */
+}
+
+.btn-limpar:hover {
+    background-color: #e2e8f0;
+    color: #334155;
+    border-color: #94a3b8;
+}
+
+
+
+/* --------------------------------------------------------------------------
+   ANIMAÇÕES (Feedback de Carregamento)
+   -------------------------------------------------------------------------- */
+.spin {
+    animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+ /* ==========================================================================
+   RESPONSIVIDADE ESPECÍFICA (Ajuste dos Filtros e Cards)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /* 1. Transforma o grid de filtros em uma lista vertical única */
+    .filtros-wrapper {
+        grid-template-columns: 1fr !important; /* Força uma coluna só */
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* 2. Ajusta os botões para ocuparem a largura total e não encavalarem */
+    .acoes-filtro-container {
+        flex-direction: column; /* Botões um embaixo do outro */
+        height: auto;           /* Libera a altura travada de 42px */
+        align-items: stretch;   /* Faz os botões esticarem até as bordas */
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .checkbox-container {
+        justify-content: center;
+        margin-right: 0;
+        padding: 10px 0;
+    }
+
+    .btn-limpar, .btn-consultar {
+        height: 40px;
+        padding: 0 15px;
+        font-size: 0.85rem;
+        white-space: nowrap;   /* Não deixa o texto do botão quebrar */
+        flex: 0 1 auto;        /* Eles não forçam mais o crescimento horizontal */
+    }
+
+    /* 3. Ajuste do Card de Resultado */
+    .resultado-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .info-entrega-container {
+        min-width: 100%;
+    }
+
+    .grid-detalhes {
+        grid-template-columns: 1fr 1fr; /* Mantém dois itens por linha no celular */
+    }
+
+    .visualizador-pdf-container {
+        height: 350px !important; /* Reduz um pouco a altura no celular para caber na tela */
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-detalhes {
+        grid-template-columns: 1fr; /* Em telas muito pequenas, tudo vira uma coluna */
+    }
+    
+    .comprovante-title {
+        font-size: 1.2rem;
+    }
+}

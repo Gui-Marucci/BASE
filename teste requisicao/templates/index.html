@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Supersonic</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}"> 
+</head>
+
+<body>
+    <div class="brand-section">
+        <div class="brand-overlay"></div>
+        <div class="brand-content">
+            <span class="brand-tag"> Painel de requisições v2.0</span>
+            <h1>Controle das suas requisições e DashBoard em tempo real.</h1>
+            <p>Monitore status de sua ordem de compra e manutenção com a inteligência Supersonic.</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="login-header">
+            <div class="logo-area">
+                <img src="{{ url_for('static', filename='img/logo.inicio.png') }}" alt="Logo" style="display: block; margin-bottom: -50px; max-width: 100%;">
+            </div>
+            <div class="welcome-text">
+                <h2 style="margin-top: 0; color: #394F5A;">Seja bem-vindo</h2>
+                <p>Insira suas credenciais para acessar o painel.</p>
+            </div>
+        </div>
+
+        <!-- ÁREA DE LOGIN -->
+        <form id="loginForm" action="/login" method="POST">
+            <div class="input-group">
+                <label for="email">E-mail Corporativo</label>
+                <div class="input-wrapper">
+                    <i data-lucide="mail" class="input-icon" size="20"></i>
+                    <input type="text" id="email" name="email" placeholder="seu e-mail@ssonic.com.br" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <div class="input-wrapper">
+                    <i data-lucide="lock" class="input-icon" size="20"></i>
+                    <input type="password" id="password" name="senha_hash" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 0.9rem;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--slate-500);">
+                    <input type="checkbox"> Lembrar-me
+                </label>
+                <a href="{{ url_for('recuperar_senha') }}" style="color: var(--supersonic-blue); text-decoration: none; font-weight: 500;">Esqueceu a senha?</a>
+            </div>
+
+            <button type="submit" class="btn-login" style="color: #14B1E7;">Acessar</button>
+        </form>
+
+        <!-- MENSAGEM DE ERRO -->
+        {% if erro %}
+        <div id="msg-erro" class="error-notification">
+            <i data-lucide="alert-circle" size="18"></i>
+            <span>{{ erro }}</span>
+        </div>
+        <script>
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('focus', () => {
+                    const msg = document.getElementById('msg-erro');
+                    if (msg) msg.style.display = 'none';
+                });
+            });
+        </script>
+        {% endif %}
+
+        <div class="form-footer">
+            <p>©️ 2026 Supersonic Tecnologia. <br>Novo por aqui? <a href="/cadastro">Crie uma conta</a>.</p>
+        </div>
+    </div>
+
+    <!-- Ativa os ícones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <script>
+        // Completa o e-mail com @ssonic.com.br se o usuário não digitar o domínio
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const emailInput = document.getElementById('email');
+            const valor = emailInput.value.trim();
+            if (valor && !valor.includes('@')) {
+                emailInput.value = valor + '@ssonic.com.br';
+            }
+        });
+    </script>
+
+</body>
+</html>

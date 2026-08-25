@@ -1,0 +1,50 @@
+{# ---------------------------------------------------------------------------
+   COMPONENTE: SIDEBAR
+   Mesma estrutura/classes já usadas no projeto (.sidebar, .nav-item, .active).
+   Só a nomenclatura dos itens foi ajustada para o domínio de Requerimentos.
+   Uso: {% include 'components/sidebar.html' %}  (variável: pagina_ativa)
+--------------------------------------------------------------------------- #}
+<aside class="sidebar">
+    <div class="sidebar-logo-container">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="sidebar-img">
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="inputBuscaMenu" placeholder="Pesquise no menu...">
+    </div>
+
+    <nav class="nav-menu">
+        <a href="{{ url_for('req.dashboard') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'dashboard' }}">
+            <i data-lucide="home"></i> Dashboard
+        </a>
+        <a href="{{ url_for('req.dados_gerais') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'dados_gerais' }}">
+            <i data-lucide="database"></i> Dados Gerais
+        </a>
+        <a href="{{ url_for('req.novo') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'novo' }}">
+            <i data-lucide="file-plus"></i> Novo Requerimento
+        </a>
+        <a href="{{ url_for('req.lista') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'requerimentos' }}">
+            <i data-lucide="clipboard-list"></i> Requerimentos
+        </a>
+        <a href="{{ url_for('comprovante') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'comprovante' }}">
+            <i data-lucide="receipt"></i> Comprovantes
+        </a>
+        <a href="{{ url_for('req.historico') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'historico' }}">
+            <i data-lucide="file-clock"></i> Histórico
+        </a>
+        <a href="{{ url_for('perfil') }}"
+           class="nav-item {{ 'active' if pagina_ativa == 'perfil' }}">
+            <i data-lucide="user"></i> Perfil
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="{{ url_for('sair') }}" class="nav-item"><i data-lucide="log-out"></i> Sair</a>
+    </div>
+</aside>

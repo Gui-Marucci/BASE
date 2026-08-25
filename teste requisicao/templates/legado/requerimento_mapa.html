@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requerimentos - Supersonic</title>
+    
+   
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/requerimento.css') }}">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+
+   
+</head>
+
+<body>
+    <aside class="sidebar">
+       
+        <div class="sidebar-logo-container">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="sidebar-img">
+        </div>
+    
+        <div class="search-container">
+            <input type="text" id="inputBuscaMenu" placeholder="Pesquise no menu...">
+        </div>
+
+          <!--Menu de navegação com a url do Flask-->
+          <nav class="nav-menu">
+            <a href="{{ url_for('painel') }}" class="nav-item"><i data-lucide="home" size="18"></i> Início</a>
+            <a href="{{ url_for('dados_gerais') }}" class="nav-item"><i data-lucide="layout-dashboard" size="18"></i> Dados Gerais</a>
+            <a href="{{ url_for('requerimento') }}" class="nav-item active"><i data-lucide="toolbox" size="18"></i> Abrir Requerimento</a>
+            <a href="{{ url_for('comprovante') }}" class="nav-item"><i data-lucide="file-clock" size="18"></i> Histórico</a>
+            <a href="{{ url_for('perfil') }}" class="nav-item"><i data-lucide="user" size="18"></i> Perfil</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('sair') }}" class="nav-item"><i data-lucide="log-out" size="18"></i> Sair</a>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header">
+            <i data-lucide="menu" onclick="toggleSidebar()" style="cursor: pointer;"></i>
+            <div class="filters-container">
+                <div class="filter-group"><label>Colaborador</label><input type="text" id="f-colaborador" placeholder="Nome..."></div>
+                <div class="filter-group"><label>Placa</label><input type="text" id="f-placa" placeholder="Placa..."></div>
+                <div class="filter-group"><label>Frota</label><input type="text" id="f-frota" placeholder="Nº..."></div>
+                <div class="filter-group"><label>Nota</label><input type="text" id="f-nota" placeholder="NFe..."></div>
+                <div class="filter-group"><label>Cliente</label><input type="text" id="f-cliente" placeholder="Cliente..."></div>
+                <button class="btn-buscar" onclick="executarBusca()">BUSCAR</button>
+            </div>
+
+
+          
+             <!--INÍCIO CONTA DA ATENDENTE-->
+             <div class="user-profile-container" onclick="toggleProfile()">
+    
+                <div class="user-info">
+                    <span class="user-name-top">{{ current_user.nome | upper }}</span>
+                    <span class="user-role">Atendente</span>
+                </div>
+                
+                <div class="user-avatar">
+                    {% set nomes = current_user.nome.split(' ') %}
+                    {{ nomes[0][0] | upper }}{{ nomes[-1][0] | upper }}
+                </div>
+            
+                <div class="profile-dropdown" id="profile-menu">
+                    <div class="profile-info-details" style="padding: 5px;">
+                        
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="mail" style="width: 14px; color: #14B1E7;"></i>
+                            <span>{{ current_user.email | upper }}</span>
+                        </div>
+                
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="user" style="width: 14px; color: #14B1E7;"></i>
+                            <span>LOGIN: 
+                                {% if current_user.usu_rod %}
+                                    {{ current_user.usu_rod[0].resp | upper }}
+                                {% else %}
+                                    {{ current_user.nome | upper }}
+                                {% endif %}
+                            </span>
+                        </div>
+                
+                        <div class="info-row" style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.8rem;">
+                            <i data-lucide="phone" style="width: 14px; color: #14B1E7;"></i>
+                            <span>{{ (current_user.telefone or 'Sem telefone') | upper }}</span>
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                         
+                    <a href="{{ url_for('sair') }}" 
+                       style="color: #dc3545; font-weight: 600; text-align: center;">
+                       Sair do Sistema
+                    </a>
+                </div>
+            </div>
+            <!--FIM CONTA DA ATENDENTE-->
+
+        </header>
+
+    </div>
+
+    <input type="hidden" id="dados-veiculos" value='{{ dados | tojson }}'>
+    <script>
+        lucide.createIcons();
+        let marcadores = []; 
+        let termosBuscaGlobal = { colaborador: "", placa: "", frota: "", nota: "", cliente: "", ativo: false };
+
+        const map = L.map('map').setView([-15.79, -47.88], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        
+        const elementoDados = document.getElementById('dados-veiculos');
+    const data = JSON.parse(elementoDados.value);
+
+const grupos = {};
+data.forEach(item => {
+    if (!item.LAT || !item.LONG) return;
+    const chave = `${item.LAT}_${item.LONG}`;
+    if (!grupos[chave]) {
+        grupos[chave] = { lat: item.LAT, lon: item.LONG, registros: [] };
+    }
+    grupos[chave].registros.push(item);
+});
+
+    Object.values(grupos).forEach(grupo => {
+        const temV = grupo.registros.some(r => r.PLACA_CAR && r.PLACA_CAR.trim() !== "");
+        const cor = temV ? "#14B1E7" : "#FF8C00"; 
+        const customIcon = L.divIcon({
+            html: `<div class="marker-inner-dot" style="background-color: ${cor};"><span class="marker-count">${grupo.registros.length}</span></div>`,
+            className: 'custom-div-icon', iconSize: [24, 24]
+        });
+
+        const marker = L.marker([grupo.lat, grupo.lon], { icon: customIcon });
+        marker.dadosGrupo = grupo; 
+        marker.addTo(map);
+        marcadores.push(marker);
+        marker.on('click', () => abrirPainel(marker.dadosGrupo));
+    });
+
+        function abrirPainel(grupo) {
+            const lista = document.getElementById('lista-detalhes');
+            let html = "";
+            const regs = grupo.registros.filter(item => {
+                if (!termosBuscaGlobal.ativo) return true;
+                return (!termosBuscaGlobal.colaborador || item.NOME_COLABORADOR?.toLowerCase().includes(termosBuscaGlobal.colaborador)) &&
+                       (!termosBuscaGlobal.placa || item.PLACA_CAR?.toLowerCase().includes(termosBuscaGlobal.placa)) &&
+                       (!termosBuscaGlobal.frota || item.FROTA?.toString().includes(termosBuscaGlobal.frota)) &&
+                       (!termosBuscaGlobal.nota || item.NOTNFE?.toString().includes(termosBuscaGlobal.nota)) &&
+                       (!termosBuscaGlobal.cliente || item.DESPAG?.toLowerCase().includes(termosBuscaGlobal.cliente));
+            });
+
+            regs.forEach(item => {
+                const temV = (item.PLACA_CAR && item.PLACA_CAR.trim() !== "");
+                html += `
+                    <div class="veiculo-card ${!temV ? 'nota-sem-veiculo' : ''}">
+                        <div class="info-group"><label>Cliente</label><span>${item.DESPAG || '---'}</span></div>
+                        ${temV ? `
+                            <div class="info-group"><label>Colaborador</label><span>${item.NOME_COLABORADOR}</span></div>
+                            <div class="info-group"><label>Telefone</label><span style="color: #14B1E7;">${item.TELEFONE_COLABORADOR || 'Não informado'}</span></div>
+                            <div class="info-group"><label>Placa / Frota</label><span>${item.PLACA_CAR} / ${item.FROTA}</span></div>
+                        ` : `<div class="info-group"><label>Status</label><span style="color:#FF8C00">Nota sem veículo</span></div>`}
+                        <div class="info-group">
+                            <label>Notas</label>
+                            <div class="nfe-container">
+                                <div class="nfe-item">NFe: ${item.NOTNFE || '---'}</div>
+                                <div class="nfe-item">CodN: ${item.NOTFIS || '---'}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            lista.innerHTML = html;
+            document.getElementById('map-panel').classList.add('open');
+        }
+
+        function executarBusca() {
+            const mot = document.getElementById('f-colaborador').value.toLowerCase().trim();
+            const pla = document.getElementById('f-placa').value.toLowerCase().trim();
+            const fro = document.getElementById('f-frota').value.toLowerCase().trim();
+            const nfe = document.getElementById('f-nota').value.toLowerCase().trim();
+            const cli = document.getElementById('f-cliente').value.toLowerCase().trim();
+
+            if (!mot && !pla && !fro && !nfe && !cli) {
+                fecharDetalhesEResetar();
+                return;
+            }
+
+            termosBuscaGlobal = { colaborador: mot, placa: pla, frota: fro, nota: nfe, cliente: cli, ativo: true };
+            let encontrado = null;
+
+            marcadores.forEach(m => {
+                const match = m.dadosGrupo.registros.some(r => {
+                    return (!mot || r.NOME_colaborador?.toLowerCase().includes(mot)) &&
+                           (!pla || r.PLACA_CAR?.toLowerCase().includes(pla)) &&
+                           (!fro || r.FROTA?.toString().includes(fro)) &&
+                           (!nfe || r.NOTNFE?.toString().includes(nfe)) &&
+                           (!cli || r.DESPAG?.toLowerCase().includes(cli));
+                });
+                if (match) { m.addTo(map); if(!encontrado) encontrado = m; } else { map.removeLayer(m); }
+            });
+            if (encontrado) { map.setView(encontrado.getLatLng(), 10); abrirPainel(encontrado.dadosGrupo); }
+        }
+
+        function fecharDetalhesEResetar() {
+            document.getElementById('map-panel').classList.remove('open');
+            document.querySelectorAll('.filters-container input').forEach(i => i.value = "");
+            termosBuscaGlobal.ativo = false;
+            marcadores.forEach(m => m.addTo(map));
+            map.setView([-15.79, -47.88], 4);
+        }
+
+        function toggleProfile() { 
+    document.getElementById('profile-menu').classList.toggle('active'); 
+}
+
+        function changeUser() {
+            const novoNome = prompt("Digite o nome do novo atendente:");
+            if (novoNome && novoNome.trim() !== "") {
+                document.getElementById('current-user').innerText = novoNome;
+                const iniciais = novoNome.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+                document.getElementById('user-logo').innerText = iniciais;
+            }
+        }
+
+        // Fecha o menu se clicar fora dele
+        window.onclick = function(event) {
+            if (!event.target.closest('.user-profile-container')) {
+                const menu = document.getElementById('profile-menu');
+                if (menu && menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                }
+            }
+        }
+        
+    </script>
+    <script src="{{ url_for('static', filename='js/menu-filter.js') }}"></script>
+</body>
+</html>

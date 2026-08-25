@@ -1,0 +1,522 @@
+/* ==========================================================================
+   VARIÁVEIS GLOBAIS
+   Definição de cores e medidas padrão para facilitar a manutenção.
+   ========================================================================== */
+   :root {
+    --azul-noite: #394F5A;    /* Cor da barra lateral e textos escuros */
+    --azul-dia: #14B1E7;      /* Cor de destaque, botões e ícones ativos */
+    --cinza: #4D4D4F;         /* Cor para parágrafos e textos secundários */
+    --bg-body: #f4f6f9;       /* Cor de fundo cinza clara das páginas */
+    --sidebar-width: 250px;   /* Largura padrão do menu lateral */
+    --shadow: 0 1px 4px rgba(0,0,0,0.1); /* Sombra leve para cards e header */
+}
+
+/* ==========================================================================
+   ESTRUTURA BASE
+   Configurações que afetam todo o corpo do site.
+   ========================================================================== */
+body { 
+    margin: 0;                /* Remove as margens padrão do navegador */
+    font-family: "Avenir Next", "Avenir", Helvetica, Arial, sans-serif;/* Define a fonte padrão */
+    background-color: var(--bg-body); 
+    display: flex;            /* Coloca Sidebar e Main-Content lado a lado */
+    min-height: 100vh;        /* Garante que o fundo cubra toda a altura da tela */
+}
+
+/* ==========================================================================
+   SIDEBAR (MENU LATERAL)
+   ========================================================================== */
+.sidebar { 
+    width: var(--sidebar-width); 
+    height: 100vh;            /* Ocupa 100% da altura da janela */
+    background-color: var(--azul-noite); 
+    color: white; 
+    position: fixed;          /* Fixa o menu para não sumir no scroll */
+    left: 0; 
+    top: 0;
+    display: flex; 
+    flex-direction: column;   /* Alinha itens de cima para baixo */
+    z-index: 1000;            /* Garante que fique acima do mapa e outros itens */
+}
+
+/* Título SUPERSONIC */
+.sidebar-header { 
+    padding: 20px; 
+    font-weight: bold; 
+    border-bottom: 1px solid rgba(255,255,255,0.1); /* Linha divisória sutil */
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-size: 1.2rem;
+}
+
+/* Campo de busca no menu */
+.search-container { padding: 15px; }
+.search-container input { 
+    width: 100%; 
+    padding: 8px; 
+    border-radius: 4px; 
+    border: none; 
+    background: rgba(255,255,255,0.1); /* Fundo semi-transparente */
+    color: white; 
+    outline: none;            /* Remove a borda azul ao clicar */
+}
+
+.nav-menu { flex: 1; padding: 10px 0; } /* Ocupa o espaço central da sidebar */
+
+/* Itens do Menu (Links) */
+.nav-item { 
+    padding: 12px 20px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    cursor: pointer; 
+    color: #c2c7d0; 
+    width: 100%; 
+    font-size: 14px; 
+    transition: all 0.3s ease; /* Animação suave no hover */
+    text-decoration: none;    /* Remove o sublinhado de link */
+    box-sizing: border-box;   /* Garante que o padding não aumente a largura */
+}
+
+/* Efeito ao passar o mouse nos links */
+.nav-item:hover { 
+    background-color: rgba(255,255,255,0.15); 
+    color: var(--azul-dia); 
+    padding-left: 25px;       /* Leve deslocamento para a direita */
+}
+
+/* Item de menu selecionado (Página Atual) */
+.nav-item.active { 
+    background-color: rgba(255,255,255,0.1); 
+    color: white; 
+    border-left: 4px solid var(--azul-dia); /* Barrinha lateral azul */
+}
+
+.sidebar-footer { 
+    border-top: 1px solid rgba(255,255,255,0.1); 
+    padding: 10px 0; 
+}
+
+/* ==========================================================================
+   CONTEÚDO PRINCIPAL E HEADER SUPERIOR
+   ========================================================================== */
+.main-content { 
+    margin-left: var(--sidebar-width); /* Dá espaço para a sidebar fixa */
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.top-header { 
+    height: 60px; 
+    background: white; 
+    display: flex; 
+    justify-content: space-between; /* Título à esquerda, Perfil à direita */
+    align-items: center; 
+    padding: 0 20px; 
+    box-shadow: var(--shadow); 
+    position: sticky;         /* Fica preso no topo ao rolar a página */
+    top: 0; 
+    z-index: 999;
+}
+
+/* ==========================================================================
+   PERFIL DO USUÁRIO E MENU DROPDOWN (LOGICA DE ATENDENTE)
+   ========================================================================== */
+.user-profile-container { 
+    position: relative;       /* Necessário para posicionar o dropdown abaixo */
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.user-profile-container:hover {
+    background: #f8f9fa;      /* Efeito de destaque ao passar o mouse */
+}
+
+/* Círculo com as iniciais */
+.user-avatar { 
+    width: 38px; 
+    height: 38px; 
+    background: var(--azul-dia); 
+    border-radius: 50%;       /* Torna o elemento redondo */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-weight: 600; 
+    font-size: 0.9rem;
+}
+
+/* Menu suspenso (escondido por padrão) */
+.profile-dropdown { 
+    display: none;            /* Esconde o menu */
+    position: absolute; 
+    top: 55px;                /* Posiciona logo abaixo do header */
+    right: 0; 
+    width: 200px; 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Sombra para dar profundidade */
+    z-index: 1100; 
+    border: 1px solid #eee; 
+    padding: 12px; 
+}
+
+/* Quando o JS adiciona a classe .active, o menu aparece */
+.profile-dropdown.active { 
+    display: block; 
+    animation: fadeIn 0.2s ease-out; /* Efeito de surgimento suave */
+}
+
+/* Animação do dropdown */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Botões dentro do menu dropdown */
+.profile-dropdown button, 
+.profile-dropdown a { 
+    width: 100%; 
+    padding: 10px; 
+    margin-bottom: 8px; 
+    border: 1px solid #eee; 
+    border-radius: 6px; 
+    background: white; 
+    cursor: pointer; 
+    font-size: 0.85rem; 
+    display: block; 
+    text-align: center; 
+    text-decoration: none; 
+    color: var(--azul-noite); 
+    font-weight: 500;
+    box-sizing: border-box; 
+    transition: all 0.2s;
+}
+
+/* Efeito hover nos botões do dropdown */
+.profile-dropdown button:hover {
+    background: var(--azul-dia);
+    color: white;
+    border-color: var(--azul-dia);
+}
+
+/* Estilo para o link de "Sair" (último item) */
+.profile-dropdown a:last-child {
+    margin-bottom: 0;         /* Remove margem do último botão */
+    color: #dc3545;           /* Cor vermelha de alerta */
+}
+
+.profile-dropdown a:last-child:hover {
+    background: #fff5f5;      /* Fundo levemente avermelhado no hover */
+    border-color: #dc3545;
+}
+
+/* ==========================================================================
+   ÁREA DE CONTEÚDO
+   Espaçamento padrão para o miolo das páginas (Dados Gerais, Início, etc).
+   ========================================================================== */
+.content-area { 
+    padding: 30px; 
+}
+
+
+
+                               /*DASHBOARD*/
+.dashboard-container { display: flex; flex-direction: column; gap: 25px; margin-top: 20px; }
+
+/* Grid de Cards */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+
+.stat-card {
+    background: white; padding: 20px; border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-bottom: 3px solid #ddd;
+}
+.stat-card i { width: 32px; height: 32px; color: #94a3b8; }
+.stat-card.pourple { border-bottom-color: rgb(150, 103, 226); }
+.stat-card.green { border-bottom-color: #10b981; }
+.stat-card.orange { border-bottom-color: #f59e0b; }
+.stat-card.red { border-bottom-color: red; }
+
+.stat-info label { display: block; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; }
+.stat-value { font-size: 24px; font-weight: 700; color: var(--azul-noite); }
+
+/* Painel de Mensagens */
+.messages-panel { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; flex: 1; }
+.panel-title { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.panel-title h3 { font-size: 1rem; color: var(--azul-noite); }
+
+.messages-list { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; }
+.msg-item { display: flex; gap: 15px; padding: 10px; border-radius: 8px; background: #f8fafc; border-left: 4px solid #cbd5e1; }
+.msg-item.alert { background: #fff1f2; border-left-color: #ef4444; }
+.msg-time { font-size: 11px; color: #94a3b8; font-weight: bold; }
+.msg-content strong { display: block; font-size: 12px; color: var(--azul-noite); }
+.msg-content p { font-size: 13px; margin: 0; color: #475569; }
+
+
+
+.input-wrapper input[type="email"], 
+.input-wrapper input[type="password"], 
+.input-wrapper input[type="text"],
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--slate-900);
+    transition: all 0.2s;
+    outline: none;
+}
+
+
+/* Container do Menu Compacto */
+.profile-dropdown {
+    min-width: 250px !important; /* Aumentamos de 210px para 250px */
+    width: auto !important;      /* Permite que a caixa estique se o e-mail for grande */
+    padding: 15px !important;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Espaçamento interno das linhas */
+.profile-info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* Super compacto entre linhas */
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    /* Força o mesmo tamanho para letras e números */
+    font-size: 11px !important; 
+    font-family: "Avenir Next", Helvetica, Arial, sans-serif !important;
+    color: #475569;
+    line-height: 1; /* Mantém a altura da linha idêntica */
+}
+
+/* ÍCONES: Agora com tamanho visível e cores vibrantes */
+/* ÍCONES: Ajustados para o tamanho correto do menu compacto */
+.info-row svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    min-height: 18px;
+    display: inline-block !important;
+}
+
+.info-row span {
+    display: inline-block;
+    vertical-align: middle;
+    /* Garante que o texto não mude de tamanho se for número */
+    font-variant-numeric: tabular-nums; 
+}
+
+/* Divisor sutil */
+.menu-divider {
+    border: 0;
+    border-top: 1px solid #f1f5f9;
+    margin: 8px 0;
+}
+
+/* Botão de Sair */
+.logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: #dc3545 !important;
+    font-weight: 600;
+    font-size: 13px !important; /* Um pouquinho maior para destaque */
+    text-decoration: none;
+    border: 1px solid #fee2e2;
+    border-radius: 6px;
+    margin-top: 5px;
+    transition: all 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #dc3545;
+    color: white !important;
+}
+
+/* Nome da atendente no topo */
+.user-name-top {
+    font-weight: 600;           /* Deixa em negrito como na sua imagem */
+    text-transform: uppercase;  /* FORÇA O MAIÚSCULO */
+    font-size: 0.8rem;         /* Ajuste o tamanho conforme o gosto */
+    color: #394F5A;                /* Cor preta sólida */
+    display: block;             /* Garante que fique em sua própria linha */
+   
+}
+
+/* Ajuste para o texto "Atendente" logo abaixo */
+.user-role {
+    font-size: 0.75rem;
+    color: #94a3b8;             /* Cinza suave para contraste */
+    display: block;
+    font-family: "Avenir Next", "Avenir", Helvetica, Arial, sans-serif;
+          
+}
+
+.user-name-top {
+    text-transform: uppercase !important; /* Força o maiúsculo no navegador */
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+/* Estado recolhido da Sidebar */
+.sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    border: none;
+}
+
+/* O conteúdo principal expande para ocupar 100% */
+.main-content.expanded {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Transição suave para não "pular" na tela */
+.sidebar, .main-content {
+    transition: all 0.3s ease-in-out;
+}
+
+
+/* logo */
+
+/* --- Ajuste do Logo na Sidebar --- */
+
+.sidebar-logo-container {
+    width: 100%;
+    height: 100px;          /* Altura reservada para o topo do menu */
+    display: flex;
+    justify-content: center; /* Centraliza o logo horizontalmente */
+    align-items: center;    /* Centraliza o logo verticalmente */
+    padding: 15px;          /* Espaço para o logo não encostar nas bordas */
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linha sutil igual ao header anterior */
+}
+
+.sidebar-img {
+    max-width: 100%;        /* Não deixa passar da largura da barra lateral */
+    max-height: 90px;       /* LARGURA IDEAL: Ajuste aqui se quiser o logo maior ou menor */
+    width: auto;
+    height: auto;
+    object-fit: contain;    /* Mantém a proporção sem distorcer */
+}
+
+/* Garante que o campo de busca não suba para cima do logo */
+.search-container {
+    padding: 15px;
+    margin-top: 0;
+}
+
+/* ==========================================================================
+   permitir que o container cresça para baixo
+   ========================================================================== */
+
+.filtros-wrapper {
+    display: flex;
+    flex-wrap: wrap;       /* Essencial para não encavalar */
+    gap: 20px;
+    align-items: flex-end; 
+    height: auto;          /* Permite que o fundo branco estique se algo descer */
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+}
+
+.input-group {
+    flex: 1 1 200px;       /* O campo cresce, mas nunca fica menor que 200px */
+    max-width: 400px;      
+}
+
+.acoes-filtro-container {
+    display: flex;
+    flex-wrap: wrap;       /* Faz os botões pularem linha entre si se necessário */
+    gap: 15px;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 2 1 300px;       /* Dá prioridade de espaço para esta área */
+    height: auto;          /* Remova o 'height: 42px' fixo que você tinha */
+    min-height: 42px;      /* Use min-height para manter o alinhamento */
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE GLOBAL (Mobile e Tablet)
+   ========================================================================== */
+   @media (max-width: 1366px) {
+    :root {
+        /* Diminui a sidebar para liberar mais área central */
+        --sidebar-width: 190px; 
+    }
+
+    /* Reduz a fonte base do projeto para encolher todos os textos */
+    body {
+        font-size: 13px; 
+    }
+
+    /* Ajuste na área de filtros para os itens encolherem antes de baterem */
+    .filtros-wrapper {
+        gap: 8px !important; /* Espaço mínimo entre os elementos */
+        padding: 15px !important;
+        display: flex !important;
+        flex-wrap: nowrap !important; /* Força ficarem na mesma linha até o limite */
+    }
+
+    .input-group {
+        flex: 1 1 auto !important;
+        min-width: 0 !important; /* Permite que o campo de NF encolha de verdade */
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 8px !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Faz os botões e o checkbox 'Busca exata' diminuírem juntos */
+    .acoes-filtro-container {
+        flex: 0 1 auto !important; /* Não deixa essa área "empurrar" os inputs */
+        gap: 8px !important;
+        white-space: nowrap;
+    }
+
+    .btn-consultar, .btn-limpar {
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-width: auto !important; /* Remove larguras mínimas que travam o encolhimento */
+    }
+
+    /* Cores do manual aplicadas aos botões menores */
+    .btn-consultar {
+        background-color: #14B1E7 !important; /* Azul Dia  */
+    }
+}
+
+/* Ajuste extremo para janelas muito estreitas de PC */
+@media (max-width: 1150px) {
+    .user-name-top, .user-role {
+        display: none; /* Remove o nome da Gabriela para não esmagar o Header superior */
+    }
+    
+    .sidebar-header {
+        font-size: 1rem;
+    }
+}

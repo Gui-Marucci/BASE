@@ -1,0 +1,25 @@
+# pip install -r requirements.txt
+# Flask e extensões
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-Mail
+
+# Segurança
+Werkzeug
+bcrypt
+
+# Banco de dados
+SQLAlchemy
+pyodbc
+
+# Google APIs
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+google-auth
+
+# Utilitários
+python-dotenv
+pandas
+requests

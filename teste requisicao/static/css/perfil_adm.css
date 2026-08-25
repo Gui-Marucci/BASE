@@ -1,0 +1,228 @@
+/* --- CONFIGURAÇÕES GERAIS --- */
+:root {
+    --azul-primario: #14B1E7;
+    --azul-escuro: #394F5A;
+    --borda: #e2e8f0;
+    --bg-fundo: #f4f7f6;
+    --sidebar-width: 260px;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    display: flex; /* Sidebar e Container lado a lado */
+    background-color: var(--bg-fundo);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* --- SIDEBAR (Fixando o espaço dela) --- */
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--azul-escuro);
+    color: white;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+/* --- CONTAINER PRINCIPAL (Ajustado para não ser atropelado) --- */
+.container {
+    flex: 1;
+    padding: 25px 40px;
+    max-width: calc(100vw - var(--sidebar-width));
+    box-sizing: border-box;
+}
+
+/* --- CABEÇALHO HERO --- */
+.profile-hero {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    background: var(--azul-primario);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* --- SEÇÃO DE PESQUISA / FILTROS --- */
+.search-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--borda);
+    margin-bottom: 25px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-box label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.input-box input, .input-box select {
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    outline: none;
+}
+
+/* --- TABELA DE RESULTADOS --- */
+.results-section {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--borda);
+    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Evita que a tabela "estique" descontroladamente */
+}
+
+th {
+    background: #f8fafc;
+    padding: 12px 15px;
+    color: #475569;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--borda);
+    text-align: left;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+/* Ajustando larguras das colunas para não esmagar */
+table th:nth-child(1) { width: 50px; }  /* # */
+table th:nth-child(2) { width: 250px; } /* Nome */
+table th:nth-child(3) { width: 220px; } /* Input Vincular */
+table th:nth-child(4) { width: 120px; } /* Filial */
+table th:nth-child(5) { width: 100px; } /* Qtd */
+table th:nth-child(6) { width: 150px; } /* Status */
+
+/* Estilo específico para a coluna do Nome do Responsável */
+table td:nth-child(2) strong {
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Centralizar colunas de métricas */
+table th:nth-child(n+4), table td:nth-child(n+4) {
+    text-align: center;
+}
+
+/* --- ESTILO DOS LOGINS VINCULADOS (PÍLULAS) --- */
+.container-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.tag-vinculo {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-remover-vinculo {
+    background: #0369a1;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remover-vinculo:hover {
+    background: #ef4444;
+}
+
+/* --- BOTÕES E INPUTS NA TABELA --- */
+.linha-atendente input[type="text"] {
+    width: 140px;
+    padding: 5px;
+    font-size: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+
+.linha-atendente button {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.linha-atendente button:hover {
+    transform: scale(1.1);
+}
+
+/* Seta de expansão */
+[id^="seta-"] {
+    transition: transform 0.3s ease;
+    vertical-align: middle;
+}
+
+/* Estilo do Select de Status */
+select[name="novo_status"] {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+}

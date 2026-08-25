@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Supersonic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recuperar_senha.css') }}"> 
+    <style>
+
+    </style>
+</head>
+<body>
+
+    <div class="form-section" style="max-width: 400px; margin: 100px auto; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div class="login-header" style="text-align: center; margin-bottom: 30px;">
+            <h2 style="margin-top: 0; color: #1e293b;">Recuperar Senha</h2>
+            <br>
+            <p style="color: #64748b;">Digite seu e-mail para receber as instruções.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert {{ 'alert-success' if category == 'success' else 'alert-danger' }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+      <form action="/esqueceu-senha" method="POST">
+        <div class="input-group" style="margin-bottom: 20px;">
+            <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500;">E-mail Corporativo</label>
+            <input type="email" name="email" placeholder="nome@ssonic.com.br" required 
+                   style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <button type="submit" style="width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Enviar Link de Recuperação
+        </button>
+    </form> <!--Duada, mudei aqui-->
+
+        <div class="form-footer" style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
+            <a href="{{ url_for('index') }}" style="color: #64748b; text-decoration: none;">Voltar para o Login</a>
+            
+        </div>
+    </div>
+
+</body>
+</html>

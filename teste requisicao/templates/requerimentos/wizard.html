@@ -1,0 +1,419 @@
+{% extends 'requerimentos/base.html' %}
+{% from 'components/ui.html' import stepper, origem_dado, area_vazia with context %}
+
+{# Macro de opções de catálogo: o valor gravado é a descrição (campos textuais
+   no banco). O código do ERP é exibido junto para conferência. #}
+{% macro opcoes(catalogo, selecionado='') -%}
+    <option value="">Selecione...</option>
+    {% for item in catalogo.itens %}
+        <option value="{{ item.descricao }}" {{ 'selected' if item.descricao == selecionado }}>
+            {{ item.codigo }} — {{ item.descricao }}
+        </option>
+    {% endfor %}
+    {% if selecionado and selecionado not in catalogo.itens | map(attribute='descricao') | list %}
+        <option value="{{ selecionado }}" selected>{{ selecionado }}</option>
+    {% endif %}
+{%- endmacro %}
+
+{% block header_acoes %}
+    <a href="{{ url_for('req.lista') }}" class="btn btn-neutro btn-pequeno">
+        <i data-lucide="list"></i> Ver requerimentos
+    </a>
+{% endblock %}
+
+{% block conteudo %}
+{% set g = dados_requerimento or {} %}
+
+<div class="pagina-cabecalho">
+    <div>
+        <h1>{{ 'Editar requerimento ' ~ requerimento.codigo_exibicao if requerimento else 'Abrir requerimento' }}</h1>
+        <p>
+            Preencha as etapas abaixo. Você pode salvar como rascunho a qualquer momento
+            e continuar depois — nada é enviado até você confirmar na revisão.
+        </p>
+    </div>
+    <div class="pagina-acoes">
+        {% if requerimento %}
+            <a href="{{ url_for('req.detalhe', requerimento_id=requerimento.id) }}" class="btn btn-neutro">
+                <i data-lucide="eye"></i> Ver detalhes
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{{ origem_dado(catalogos) }}
+
+<form class="wizard" id="form-req" novalidate
+      data-req-id="{{ requerimento.id if requerimento else '' }}"
+      data-etapa-inicial="{{ etapa_inicial or 1 }}">
+
+    {# ---------------- STEPPER + PROGRESSO ---------------- #}
+    <div>
+        {{ stepper(ETAPAS, etapa_inicial or 1, situacao_etapas) }}
+        <div class="progresso-wrapper">
+            <div class="progresso-barra">
+                <div class="progresso-preenchida" id="progresso"></div>
+            </div>
+            <span class="progresso-texto" id="progresso-texto">Etapa 1 de {{ ETAPAS|length }}</span>
+        </div>
+    </div>
+
+    {# =========================================================
+       ETAPA 1 — GERAL
+       ========================================================= #}
+    <section class="etapa ativa" data-etapa="1" aria-labelledby="tit-geral">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-geral"><i data-lucide="file-plus"></i> Dados gerais</h2>
+                <span class="cartao-subtitulo">Campos com <strong>*</strong> são obrigatórios para envio</span>
+            </div>
+
+            <div class="grade-campos">
+                <div class="campo">
+                    <label for="codigo">Código do requerimento</label>
+                    <input type="text" id="codigo" readonly
+                           value="{{ requerimento.codigo_exibicao if requerimento else 'Gerado ao enviar' }}">
+                    <small class="campo-dica">Numeração sequencial controlada pelo sistema.</small>
+                </div>
+
+                <div class="campo">
+                    <label for="tipo">Tipo de requerimento <span class="obrigatorio">*</span></label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Selecione...</option>
+                        {% for chave, rotulo in TIPOS_REQUERIMENTO.items() %}
+                            <option value="{{ chave }}" {{ 'selected' if g.tipo == chave }}>{{ rotulo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="prioridade">Prioridade <span class="obrigatorio">*</span></label>
+                    <select id="prioridade" name="prioridade" required>
+                        {% for chave, info in PRIORIDADES.items() %}
+                            <option value="{{ chave }}"
+                                {{ 'selected' if (g.prioridade or 'NORMAL') == chave }}>{{ info.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="data_referencia">Data de referência <span class="obrigatorio">*</span></label>
+                    <input type="date" id="data_referencia" name="data_referencia"
+                           value="{{ g.data_referencia or hoje }}">
+                </div>
+
+                <div class="campo">
+                    <label for="data_limite">Data limite de entrega <span class="obrigatorio">*</span></label>
+                    <input type="date" id="data_limite" name="data_limite" value="{{ g.data_limite or '' }}">
+                </div>
+
+                <div class="campo">
+                    <label for="tipo_requisicao">Tipo de requisição (ERP)</label>
+                    <select id="tipo_requisicao" name="tipo_requisicao">
+                        {{ opcoes(catalogos.tipos_requisicao, g.tipo_requisicao or '') }}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h3><i data-lucide="user"></i> Solicitante</h3>
+            </div>
+            <div class="grade-campos">
+                <div class="campo">
+                    <label for="solicitante_nome">Solicitante <span class="obrigatorio">*</span></label>
+                    <input type="text" id="solicitante_nome" name="solicitante_nome" maxlength="120"
+                           value="{{ g.solicitante_nome or current_user.nome }}">
+                </div>
+                <div class="campo">
+                    <label for="solicitante_email">E-mail <span class="obrigatorio">*</span></label>
+                    <input type="email" id="solicitante_email" name="solicitante_email" maxlength="120"
+                           value="{{ g.solicitante_email or current_user.email }}">
+                </div>
+                <div class="campo">
+                    <label for="solicitante_telefone">Telefone</label>
+                    <input type="text" id="solicitante_telefone" name="solicitante_telefone" maxlength="30"
+                           value="{{ g.solicitante_telefone or current_user.telefone or '' }}">
+                </div>
+                <div class="campo">
+                    <label for="funcionario">Funcionário / matrícula</label>
+                    <input type="text" id="funcionario" name="funcionario" maxlength="120"
+                           value="{{ g.funcionario or '' }}">
+                    <small class="campo-dica">Use quando o requerimento for feito para outra pessoa.</small>
+                </div>
+                <div class="campo">
+                    <label for="filial">Filial <span class="obrigatorio">*</span></label>
+                    <select id="filial" name="filial">{{ opcoes(catalogos.filiais, g.filial or '') }}</select>
+                </div>
+                <div class="campo">
+                    <label for="setor">Setor <span class="obrigatorio">*</span></label>
+                    <select id="setor" name="setor">{{ opcoes(catalogos.setores, g.setor or '') }}</select>
+                </div>
+                <div class="campo">
+                    <label for="responsavel">Responsável pelo atendimento</label>
+                    <select id="responsavel" name="responsavel">
+                        {{ opcoes(catalogos.responsaveis, g.responsavel or '') }}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h3><i data-lucide="folder-tree"></i> Classificação e rateio</h3>
+            </div>
+            <div class="grade-campos">
+                <div class="campo">
+                    <label for="unidade_negocio">Unidade de negócio</label>
+                    <select id="unidade_negocio" name="unidade_negocio">
+                        {{ opcoes(catalogos.unidades_negocio, g.unidade_negocio or '') }}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="centro_gasto">Centro de gasto</label>
+                    <select id="centro_gasto" name="centro_gasto">
+                        {{ opcoes(catalogos.centros_gasto, g.centro_gasto or '') }}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="centro_custo">Centro de custo <span class="obrigatorio">*</span></label>
+                    <select id="centro_custo" name="centro_custo">
+                        {{ opcoes(catalogos.centros_custo, g.centro_custo or '') }}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="classe_sintetica">Classe sintética</label>
+                    <select id="classe_sintetica" name="classe_sintetica">
+                        {{ opcoes(catalogos.classes_sinteticas, g.classe_sintetica or '') }}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="classe_analitica">Classe analítica</label>
+                    <select id="classe_analitica" name="classe_analitica">
+                        {{ opcoes(catalogos.classes_analiticas, g.classe_analitica or '') }}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="categoria">Categoria</label>
+                    <select id="categoria" name="categoria">
+                        {{ opcoes(catalogos.categorias, g.categoria or '') }}
+                    </select>
+                </div>
+
+                <div class="campo largo">
+                    <label for="justificativa">Justificativa <span class="obrigatorio">*</span></label>
+                    <textarea id="justificativa" name="justificativa"
+                              placeholder="Explique a necessidade: o que motivou o requerimento, onde será usado e o impacto de não atender.">{{ g.justificativa or '' }}</textarea>
+                    <small class="campo-dica">Mínimo de 10 caracteres.</small>
+                </div>
+
+                <div class="campo largo">
+                    <label for="observacao">Observações internas</label>
+                    <textarea id="observacao" name="observacao">{{ g.observacao or '' }}</textarea>
+                </div>
+
+                <div class="campo largo">
+                    <div class="linha-checkbox">
+                        <input type="checkbox" id="necessita_cotacao" name="necessita_cotacao"
+                               {{ 'checked' if g.necessita_cotacao }}>
+                        <label for="necessita_cotacao">
+                            Este requerimento precisa de cotação de fornecedores
+                        </label>
+                    </div>
+                    <small class="campo-dica">
+                        Quando marcado, é obrigatório informar ao menos uma cotação na etapa 6.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 2 — ITENS
+       ========================================================= #}
+    <section class="etapa" data-etapa="2" aria-labelledby="tit-itens">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-itens"><i data-lucide="package"></i> Itens do requerimento</h2>
+                <div class="pagina-acoes">
+                    <button type="button" class="btn btn-neutro btn-pequeno" id="btn-buscar-produto">
+                        <i data-lucide="search"></i> Buscar no catálogo
+                    </button>
+                    <button type="button" class="btn btn-primario btn-pequeno" data-adicionar="itens">
+                        <i data-lucide="plus"></i> Adicionar item
+                    </button>
+                </div>
+            </div>
+
+            <div class="lista-dinamica" id="lista-itens"></div>
+            <div id="vazio-itens">
+                {{ area_vazia('package-open', 'Nenhum item adicionado',
+                    'Adicione os produtos ou serviços solicitados. Cada item precisa de descrição, quantidade e unidade.') }}
+            </div>
+
+            <div class="resumo-total">
+                <span>Valor estimado pelos itens</span>
+                <strong id="total-itens">R$ 0,00</strong>
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 3 — LOCALIZAÇÕES
+       ========================================================= #}
+    <section class="etapa" data-etapa="3" aria-labelledby="tit-loc">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-loc"><i data-lucide="map-pin"></i> Localizações</h2>
+                <button type="button" class="btn btn-primario btn-pequeno" data-adicionar="localizacoes">
+                    <i data-lucide="plus"></i> Adicionar localização
+                </button>
+            </div>
+            <p class="cartao-subtitulo" style="margin-top:-8px;margin-bottom:14px;">
+                Onde os itens serão entregues ou utilizados. Deixe o item em branco para valer
+                para todo o requerimento.
+            </p>
+
+            <div class="lista-dinamica" id="lista-localizacoes"></div>
+            <div id="vazio-localizacoes">
+                {{ area_vazia('map-pinned', 'Nenhuma localização informada',
+                    'Informe pelo menos um local de entrega ou utilização antes de enviar.') }}
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 4 — BAIXAS / COMPLEMENTOS
+       ========================================================= #}
+    <section class="etapa" data-etapa="4" aria-labelledby="tit-comp">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-comp"><i data-lucide="clipboard-list"></i> Baixas e complementos</h2>
+                <button type="button" class="btn btn-primario btn-pequeno" data-adicionar="complementos">
+                    <i data-lucide="plus"></i> Adicionar registro
+                </button>
+            </div>
+            <div class="aviso-dev" style="background:#eef6fb;border-color:#bfe3f5;border-left-color:#14B1E7;">
+                <i data-lucide="info"></i>
+                <div>
+                    <strong>Etapa opcional</strong>
+                    <p style="color:#2b5f78;">
+                        Equivale à aba <em>Baixas</em> do ERP. A semântica exata dos campos ainda
+                        precisa ser confirmada na base do ERP; aqui ela registra movimentações e
+                        informações complementares vinculadas ao requerimento.
+                    </p>
+                </div>
+            </div>
+
+            <div class="lista-dinamica" id="lista-complementos"></div>
+            <div id="vazio-complementos">
+                {{ area_vazia('clipboard-check', 'Nenhum complemento registrado',
+                    'Use esta etapa para consumos previstos, baixas de estoque, substituições ou transferências.') }}
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 5 — ANEXOS
+       ========================================================= #}
+    <section class="etapa" data-etapa="5" aria-labelledby="tit-anexos">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-anexos"><i data-lucide="paperclip"></i> Anexos</h2>
+                <span class="cartao-subtitulo">PDF, imagens, Word e Excel — até 15 MB por arquivo</span>
+            </div>
+
+            <div class="area-upload" id="area-upload">
+                <i data-lucide="upload-cloud"></i>
+                <p>Arraste os arquivos aqui ou selecione no computador.</p>
+                <input type="file" id="input-anexo" multiple hidden
+                       accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.doc,.docx">
+                <button type="button" class="btn btn-neutro" id="btn-anexo">
+                    <i data-lucide="file-plus-2"></i> Selecionar arquivos
+                </button>
+            </div>
+
+            <div class="lista-anexos" id="lista-anexos"></div>
+            <div id="vazio-anexos">
+                {{ area_vazia('paperclip', 'Nenhum anexo enviado',
+                    'Anexos são opcionais, mas ajudam na análise: orçamentos, fotos, especificações técnicas.') }}
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 6 — COTAÇÕES
+       ========================================================= #}
+    <section class="etapa" data-etapa="6" aria-labelledby="tit-cot">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-cot"><i data-lucide="calculator"></i> Cotações</h2>
+                <button type="button" class="btn btn-primario btn-pequeno" data-adicionar="cotacoes">
+                    <i data-lucide="plus"></i> Adicionar cotação
+                </button>
+            </div>
+            <p class="cartao-subtitulo" style="margin-top:-8px;margin-bottom:14px;">
+                O sistema destaca o menor preço e o melhor prazo, mas a escolha do fornecedor
+                vencedor é sempre manual.
+            </p>
+
+            <div class="lista-dinamica" id="lista-cotacoes"></div>
+            <div id="vazio-cotacoes">
+                {{ area_vazia('calculator', 'Nenhuma cotação registrada',
+                    'Informe fornecedor, quantidade, preço e prazo para comparar as propostas.') }}
+            </div>
+
+            <div class="resumo-total">
+                <span>Total da cotação selecionada</span>
+                <strong id="total-cotacoes">R$ 0,00</strong>
+            </div>
+        </div>
+    </section>
+
+    {# =========================================================
+       ETAPA 7 — REVISÃO
+       ========================================================= #}
+    <section class="etapa" data-etapa="7" aria-labelledby="tit-rev">
+        <div class="cartao">
+            <div class="cartao-cabecalho">
+                <h2 id="tit-rev"><i data-lucide="check-circle"></i> Revisão final</h2>
+                <span class="cartao-subtitulo">Confira os dados antes de enviar</span>
+            </div>
+            <div id="revisao"></div>
+        </div>
+    </section>
+
+    {# ---------------- RODAPÉ DE AÇÕES ---------------- #}
+    <div class="wizard-rodape">
+        <div class="grupo">
+            <button type="button" class="btn btn-neutro" id="btn-voltar">
+                <i data-lucide="arrow-left"></i> Voltar
+            </button>
+            <button type="button" class="btn btn-escuro" id="btn-proximo">
+                Salvar e continuar <i data-lucide="arrow-right"></i>
+            </button>
+            <button type="button" class="btn btn-sucesso" id="btn-enviar" hidden>
+                <i data-lucide="send"></i> Enviar requerimento
+            </button>
+        </div>
+
+        <div class="grupo">
+            <span class="estado-salvamento" id="estado-salvamento"></span>
+            <button type="button" class="btn btn-neutro" id="btn-rascunho">
+                <i data-lucide="save"></i> Salvar rascunho
+            </button>
+            <button type="button" class="btn btn-perigo" id="btn-cancelar">
+                <i data-lucide="x-circle"></i> Cancelar
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script id="dados-catalogos" type="application/json">{{ catalogos | tojson }}</script>
+<script id="dados-requerimento" type="application/json">{{ (dados_requerimento or {}) | tojson }}</script>
+<script id="dados-dominio" type="application/json">{{ {'tipos_movimento': TIPOS_MOVIMENTO, 'etapas': ETAPAS} | tojson }}</script>
+<script src="{{ url_for('static', filename='js/req-wizard.js') }}"></script>
+{% endblock %}

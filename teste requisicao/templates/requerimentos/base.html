@@ -1,0 +1,64 @@
+{# ---------------------------------------------------------------------------
+   LAYOUT BASE DA ÁREA DE REQUERIMENTOS
+   Reaproveita geral.css (identidade visual existente) + requerimentos.css
+   (apenas os componentes novos). Sidebar e header são componentes.
+--------------------------------------------------------------------------- #}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo_pagina or 'Requerimentos' }} - Supersonic</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/requerimentos.css') }}">
+    {% block estilos %}{% endblock %}
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="tema-requerimentos">
+
+    {% include 'components/sidebar.html' %}
+
+    <div class="main-content">
+        {% from 'components/header.html' import topbar with context %}
+        {% call topbar(titulo_pagina) %}{% block header_acoes %}{% endblock %}{% endcall %}
+
+        <main class="content-area">
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    <div class="flash-area">
+                        {% for categoria, mensagem in mensagens %}
+                            <div class="flash flash-{{ categoria }}">{{ mensagem }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block conteudo %}{% endblock %}
+        </main>
+    </div>
+
+    {# Área de toasts (feedback visual) e host de modais #}
+    <div class="toast-area" id="toast-area" aria-live="polite"></div>
+    <div class="modal-host" id="modal-host" hidden>
+        <div class="modal-fundo" data-fechar-modal></div>
+        <div class="modal-caixa" role="dialog" aria-modal="true">
+            <header class="modal-cabecalho">
+                <h3 id="modal-titulo">Confirmação</h3>
+                <button type="button" class="botao-icone" data-fechar-modal aria-label="Fechar">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
+            <div class="modal-corpo" id="modal-corpo"></div>
+            <footer class="modal-pe" id="modal-pe"></footer>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/menu-filter.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/req-core.js') }}"></script>
+    {% block scripts %}{% endblock %}
+    <script>lucide.createIcons();</script>
+</body>
+</html>

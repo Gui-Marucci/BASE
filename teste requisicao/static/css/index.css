@@ -1,0 +1,567 @@
+/* --- CSS da página Login --- */
+
+/* --- VARIÁVEIS DE CORES E ESTILO --- */
+
+:root {
+
+    --supersonic-blue: #00aeef;
+
+    --supersonic-dark: #008dbf;
+
+    --slate-50: #f8fafc;
+
+    --slate-100: #f1f5f9;
+
+    --slate-200: #e2e8f0;
+
+    --slate-300: #cbd5e1;
+
+    --slate-400: #94a3b8;
+
+    --slate-500: #64748b;
+
+    --slate-700: #334155;
+
+    --slate-800: #1e293b;
+
+    --slate-900: #0f172a;
+
+    --white: #ffffff;
+
+}
+
+
+
+/* --- RESET BÁSICO --- */
+
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+    font-family: 'Inter', sans-serif;
+
+}
+
+
+
+body {
+
+    height: 100vh;
+
+    display: flex;
+
+    background-color: var(--white);
+
+    overflow: hidden;
+
+}
+
+
+
+/* --- LADO ESQUERDO (BRANDING) --- */
+
+.brand-section {
+
+    flex: 1;
+
+    background-color: var(--slate-900);
+
+    /* Adicionado o caminho da imagem de fundo aqui */
+
+    background-image: url('../img/img.png');
+
+    background-size: cover;
+
+    background-position: center;
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-end;
+
+    padding: 60px;
+
+    color: var(--white);
+
+}
+
+
+
+.brand-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4));
+
+}
+
+
+
+.brand-content {
+
+    position: relative;
+
+    z-index: 10;
+
+    max-width: 500px;
+
+}
+
+
+
+.brand-tag {
+
+    display: inline-block;
+
+    background: var(--supersonic-blue);
+
+    color: white;
+
+    padding: 6px 12px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    font-size: 0.8rem;
+
+    margin-bottom: 15px;
+
+}
+
+
+
+.brand-content h1 {
+
+    font-size: 3rem;
+
+    font-weight: 700;
+
+    line-height: 1.1;
+
+    margin-bottom: 20px;
+
+}
+
+
+
+.brand-content p {
+
+    font-size: 1.1rem;
+
+    color: var(--slate-300);
+
+    line-height: 1.6;
+
+}
+
+
+
+/* --- LADO DIREITO (FORMULÁRIO) --- */
+
+.form-section {
+
+    width: 100%;
+
+    max-width: 520px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding: 40px;
+
+    background-color: var(--white);
+
+}
+
+
+
+.login-header {
+
+    margin-bottom: 40px;
+
+}
+
+
+
+.logo-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: var(--supersonic-blue);
+
+    margin-bottom: 20px;
+
+}
+
+
+/* Ajuste do tamanho da Logo - Aumente o valor de max-width */
+.logo-area img, 
+.brand-section img {
+    max-width: 250px !important; /* Estava 150px, mude para 250px ou 300px */
+    width: 100% !important;      /* Permite que ela cresça até o limite do max-width */
+    height: auto !important;     /* Mantém a proporção */
+    margin: 0 auto 20px auto !important; /* Centraliza e dá espaço embaixo */
+    display: block !important;
+}
+
+.welcome-text h2 {
+
+    font-size: 1.8rem;
+
+    font-weight: 700;
+
+    color: var(--slate-900);
+
+    margin-bottom: 8px;
+
+}
+
+
+
+.welcome-text p {
+
+    color: var(--slate-500);
+
+}
+
+
+
+/* Inputs */
+
+.input-group {
+
+    margin-bottom: 20px;
+
+}
+
+
+
+.input-group label {
+
+    display: block;
+
+    font-size: 0.9rem;
+
+    font-weight: 500;
+
+    color: var(--slate-700);
+
+    margin-bottom: 8px;
+
+}
+
+
+
+.input-wrapper {
+
+    position: relative;
+
+}
+
+
+
+.input-wrapper input {
+
+    width: 100%;
+
+    padding: 12px 12px 12px 40px;
+
+    border: 1px solid var(--slate-300);
+
+    border-radius: 8px;
+
+    font-size: 1rem;
+
+    color: var(--slate-900);
+
+    transition: all 0.2s;
+
+    outline: none;
+
+}
+
+
+
+.input-wrapper input:focus {
+
+    border-color: var(--supersonic-blue);
+
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1);
+
+}
+
+
+/*íCONE*/
+.input-icon {
+
+    position: absolute;
+
+    left: 12px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--slate-400);
+
+    pointer-events: none;
+
+}
+
+
+
+/* Botão */
+
+.btn-login {
+
+    width: 100%;
+
+    padding: 14px;
+
+    background-color: var(--supersonic-blue);
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 1rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background 0.2s;
+
+    margin-top: 10px;
+
+}
+
+
+
+.btn-login:hover {
+
+    background-color: var(--supersonic-dark);
+
+}
+
+
+
+.form-footer {
+
+    margin-top: 24px;
+
+    text-align: center;
+
+    font-size: 0.9rem;
+
+    color: var(--slate-500);
+
+}
+
+
+
+.form-footer a {
+
+    color: var(--supersonic-blue);
+
+    text-decoration: none;
+
+    font-weight: 500;
+
+}
+
+
+
+/* Responsividade */
+
+@media (max-width: 900px) {
+
+    .brand-section { display: none; }
+
+    .form-section { max-width: 100%; }
+
+}
+
+/* notificação de erro  */
+.error-notification {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* botão */
+
+/* =========================================
+   BOTÃO ACESSAR - AJUSTE DE LARGURA TOTAL
+   ========================================= */
+   .btn-login { 
+    display: block !important;    /* Força o botão a se comportar como bloco */
+    width: 100% !important;       /* Faz ocupar 100% da largura do formulário */
+    background: #14B1E7!important;
+    color: #ffffff !important; 
+    padding: 16px 0 !important;   /* Mantém a altura elegante */
+    font-size: 16px !important; 
+    font-weight: 700 !important; 
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    text-decoration: none !important; 
+    border-radius: 10px !important; /* Estilo pílula que você escolheu */
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255,255,255,0.3) !important; 
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important; 
+    position: relative !important;
+    overflow: hidden !important;
+    margin-top: 25px !important;  /* Espaço para não colar no "Lembrar-me" */
+}
+
+/* Efeito de brilho (mantenha este para o efeito de animação) */
+.btn-login::after {
+    content: ''; 
+    position: absolute; 
+    top: 0; 
+    left: -100%; 
+    width: 100%; 
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent) !important;
+    transition: all 0.6s ease !important;
+}
+
+.btn-login:hover { 
+    transform: translateY(-3px) !important; 
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5) !important; 
+    background: #1d4ed8 !important;
+}
+
+.btn-login:hover::after { 
+    left: 100% !important; 
+}
+
+
+/* Responsividade */
+
+
+
+/* Este bloco deve ficar no seu HTML ou no final do CSS */
+
+
+
+@media screen and (max-width: 1100px) {
+
+    body {
+
+        flex-direction: column !important;
+
+        height: auto !important;
+
+        min-height: 100vh;
+
+        overflow-y: auto !important;
+
+    }
+
+
+
+    /* A parte da imagem (Brand) se ajusta proporcionalmente */
+
+    .brand-section {
+
+        flex: none !important;
+
+        width: 100% !important;
+
+        height: auto !important;
+
+        min-height: 30vh; /* Ocupa 30% da altura da tela */
+
+        padding: 40px 20px !important;
+
+    }
+
+
+
+    /* O Formulário agora ganha 100% de largura para não espremer os inputs */
+
+    .form-section {
+
+        flex: none !important;
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        padding: 40px 20px !important;
+
+    }
+
+
+
+    /* AS LETRAS: Aqui está o segredo do ajuste de escala */
+
+    .brand-content h1 {
+
+        font-size: clamp(1.5rem, 5vw, 2.5rem) !important; 
+
+        text-align: center;
+
+    }
+
+
+
+    .brand-content p {
+
+        font-size: clamp(0.9rem, 2vw, 1.1rem) !important;
+
+        text-align: center;
+
+    }
+
+
+
+    /* Ajuste da Logo para não sumir no topo */
+
+    .logo-area img {
+
+        max-width: 180px !important;
+
+        margin: 0 auto !important;
+
+        display: block;
+
+    }
+
+}

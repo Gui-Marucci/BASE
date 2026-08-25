@@ -1,0 +1,156 @@
+/* --- VARIÁVEIS DE CORES SUPERSONIC --- */
+:root {
+    --supersonic-blue: #14B1E7;
+    --supersonic-dark: #14B1E7;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9; /* Tom de cinza da empresa */
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1; /* Cor da borda das caixinhas */
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-700: #334155;
+    --slate-900: #0f172a;
+    --white: #ffffff;
+}
+
+/* --- RESET BÁSICO --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;     /* Centraliza o formulário verticalmente */
+    justify-content: center;  /* Centraliza o formulário horizontalmente */
+    background-color: var(--slate-100); /* Fundo cinza corporativo */
+    overflow: hidden;
+}
+
+/* --- CARTÃO DO FORMULÁRIO CENTRAL --- */
+.form-section {
+    width: 100%;
+    max-width: 480px;
+    background-color: var(--white);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Sombra para destacar do fundo */
+}
+
+/* --- CABEÇALHO E LOGO --- */
+.login-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.logo-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-area img {
+    max-width: 200px;
+    height: auto;
+    display: block;
+}
+
+.welcome-text h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+}
+
+.welcome-text p {
+    color: var(--slate-500);
+    font-size: 0.95rem;
+}
+
+/* --- ESTILO DAS CAIXINHAS (INPUTS) --- */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--slate-700);
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+/* Aplica a borda visível em todos os inputs */
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 12px 12px 42px; /* Espaço para o ícone */
+    border: 1.5px solid var(--slate-300); /* A "caixinha" definida */
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--slate-900);
+    background-color: var(--white);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+/* Efeito de foco quando clica na caixinha */
+.input-wrapper input:focus {
+    border-color: var(--supersonic-blue);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1);
+}
+
+/* Ícones dentro das caixinhas */
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    pointer-events: none;
+}
+
+/* --- BOTÃO DE FINALIZAR --- */
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--supersonic-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    background-color: var(--supersonic-dark);
+}
+
+/* --- RODAPÉ --- */
+.form-footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--slate-500);
+}
+
+.form-footer a {
+    color: var(--supersonic-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
