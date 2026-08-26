@@ -1,0 +1,26 @@
+{% extends "previsao/base.html" %}
+{% block title %}Importar Previsão{% endblock %}
+{% block conteudo %}
+<!-- =========================================================
+     BLOCO: IMPORTAÇÃO
+     Fluxo obrigatório: arquivo -> identificação -> validação -> revisão -> confirmação.
+     Nenhum registro é salvo pela primeira chamada da API.
+     ========================================================= -->
+<div class="cartao prev-form">
+  <div class="cartao-cabecalho"><h3><i data-lucide="file-up"></i> Importar planilha orçamentária</h3></div>
+  <p class="prev-ajuda">Modelo inicial: aba <strong>Previsão para Junho</strong>. Colunas esperadas: CIA, FORNECEDORES, VENCTO, VALOR, REFERENCIA DO SERVIÇO/PRODUTO e Classificação - Pagamentos Operacionais.</p>
+  <form id="formImportacao" class="prev-form-grid" enctype="multipart/form-data">
+    <label>Setor padrão *<select name="setor" required><option value="">Selecione</option>{% for setor in setores %}<option>{{ setor }}</option>{% endfor %}</select></label>
+    <label>Aba (opcional)<input name="aba" placeholder="Previsão para Junho"></label>
+    <label class="campo-largo">Arquivo *<input type="file" name="arquivo" accept=".xlsx,.xls" required></label>
+    <div class="campo-largo prev-acoes"><button class="btn btn-primario" type="submit">Analisar planilha</button></div>
+  </form>
+</div>
+
+<div id="resultadoImportacao" class="cartao prev-revisao" hidden>
+  <div class="cartao-cabecalho"><h3>Revisão antes da gravação</h3><span id="resumoImportacao"></span></div>
+  <div id="alertasImportacao"></div>
+  <div class="prev-tabela-scroll"><table class="prev-tabela"><thead><tr><th>Linha</th><th>CIA</th><th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Referência</th><th>Classificação</th><th>Análise</th></tr></thead><tbody id="tabelaImportacao"></tbody></table></div>
+  <div class="prev-acoes"><button id="confirmarImportacao" class="btn btn-primario">Confirmar importação</button><a href="{{ url_for('previsao.index') }}" class="btn btn-neutro">Cancelar</a></div>
+</div>
+{% endblock %}
