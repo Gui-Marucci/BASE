@@ -1,50 +1,38 @@
-{# ---------------------------------------------------------------------------
-   COMPONENTE: SIDEBAR
-   Mesma estrutura/classes já usadas no projeto (.sidebar, .nav-item, .active).
-   Só a nomenclatura dos itens foi ajustada para o domínio de Requerimentos.
-   Uso: {% include 'components/sidebar.html' %}  (variável: pagina_ativa)
---------------------------------------------------------------------------- #}
+{#
+BLOCO: NAVEGAÇÃO RAD
+A navegação foi reduzida ao núcleo desta branch: Início, Requisições,
+Perfil e Sair. Rotas legadas continuam no backend para compatibilidade,
+mas deixam de compor a experiência principal.
+#}
 <aside class="sidebar">
     <div class="sidebar-logo-container">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="sidebar-img">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Supersonic" class="sidebar-img">
     </div>
 
     <div class="search-container">
-        <input type="text" id="inputBuscaMenu" placeholder="Pesquise no menu...">
+        <input type="text" id="inputBuscaMenu" placeholder="Pesquise no menu..." aria-label="Pesquisar no menu">
     </div>
 
-    <nav class="nav-menu">
-        <a href="{{ url_for('req.dashboard') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'dashboard' }}">
-            <i data-lucide="home"></i> Dashboard
+    <nav class="nav-menu" aria-label="Navegação principal">
+        {# INÍCIO: reaproveita req.dashboard como shell autenticado vazio nesta primeira iteração. #}
+        <a href="{{ url_for('req.dashboard') }}" class="nav-item {{ 'active' if pagina_ativa == 'dashboard' }}">
+            <i data-lucide="home"></i> Início
         </a>
-        <a href="{{ url_for('req.dados_gerais') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'dados_gerais' }}">
-            <i data-lucide="database"></i> Dados Gerais
+
+        {# REQUISIÇÕES: entrada única para consulta e criação; telas secundárias continuam acessíveis pelo próprio fluxo. #}
+        <a href="{{ url_for('req.lista') }}" class="nav-item {{ 'active' if pagina_ativa in ['requerimentos', 'novo'] }}">
+            <i data-lucide="clipboard-list"></i> Requisições
         </a>
-        <a href="{{ url_for('req.novo') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'novo' }}">
-            <i data-lucide="file-plus"></i> Novo Requerimento
-        </a>
-        <a href="{{ url_for('req.lista') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'requerimentos' }}">
-            <i data-lucide="clipboard-list"></i> Requerimentos
-        </a>
-        <a href="{{ url_for('comprovante') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'comprovante' }}">
-            <i data-lucide="receipt"></i> Comprovantes
-        </a>
-        <a href="{{ url_for('req.historico') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'historico' }}">
-            <i data-lucide="file-clock"></i> Histórico
-        </a>
-        <a href="{{ url_for('perfil') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'perfil' }}">
+
+        {# PERFIL: mantém o endpoint de perfil já existente para não duplicar autenticação ou usuário. #}
+        <a href="{{ url_for('perfil') }}" class="nav-item {{ 'active' if pagina_ativa == 'perfil' }}">
             <i data-lucide="user"></i> Perfil
         </a>
     </nav>
 
     <div class="sidebar-footer">
-        <a href="{{ url_for('sair') }}" class="nav-item"><i data-lucide="log-out"></i> Sair</a>
+        <a href="{{ url_for('sair') }}" class="nav-item">
+            <i data-lucide="log-out"></i> Sair
+        </a>
     </div>
 </aside>
