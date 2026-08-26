@@ -1,0 +1,18 @@
+{# CAMADA 1 — CADASTRO: tela mínima de criação de identidade, sem dependência do shell. #}
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cadastro - Supersonic</title><link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}"></head>
+<body>
+<section class="form-section">
+    <div class="welcome-text"><h2>Criar conta</h2><p>Preencha os dados para solicitar seu acesso.</p></div>
+    {% with mensagens = get_flashed_messages(with_categories=true) %}{% for categoria, mensagem in mensagens %}<div class="error-notification"><span>{{ mensagem }}</span></div>{% endfor %}{% endwith %}
+    <form method="post" action="{{ url_for('auth.cadastro') }}">
+        <div class="input-group"><label>Nome</label><input name="nome" required></div>
+        <div class="input-group"><label>E-mail</label><input name="email" type="email" required></div>
+        <div class="input-group"><label>Senha</label><input name="senha_hash" type="password" required></div>
+        <div class="input-group"><label>Telefone</label><input name="telefone"></div>
+        <div class="input-group"><label>Usuário operacional</label><input name="usuario_rodopar" required></div>
+        <button type="submit" class="btn-login">Criar conta</button>
+    </form>
+    <div class="form-footer"><a href="{{ url_for('auth.index') }}">Voltar ao login</a></div>
+</section>
+</body></html>
