@@ -5,6 +5,7 @@ Nenhuma regra das futuras camadas deve ser adicionada aqui.
 """
 
 import hashlib
+import os
 import re
 import uuid
 from datetime import datetime, timedelta
@@ -21,11 +22,10 @@ from base.core.extensions import db, mail
 auth_bp = Blueprint("auth", __name__)
 SHA2_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
-
 # ============================================================
 # BLOCO: VALIDAÇÃO DE CREDENCIAL LEGADA
-# Permite que a nova camada reconheça hashes usados pelo ambiente anterior
-# e migre o hash para o formato atual somente depois de uma autenticação válida.
+# Permite reconhecer hashes usados pelo ambiente anterior e migrá-los somente
+# depois de uma autenticação válida, sem alterar a senha antes disso.
 # ============================================================
 def validar_senha(usuario: Usuario, senha: str) -> bool:
     armazenada = (usuario.senha_hash or "").strip()
@@ -45,7 +45,6 @@ def validar_senha(usuario: Usuario, senha: str) -> bool:
             db.session.commit()
             return True
 
-    # Bcrypt permanece aceito somente se a dependência estiver disponível.
     if armazenada.startswith("$2"):
         try:
             import bcrypt
@@ -74,8 +73,8 @@ def login():
     if request.method == "GET":
         return render_template("index.html")
 
-    # REGRA: o domínio corporativo pode ser omitido pelo usuário, mantendo o
-    # comportamento já utilizado no ambiente anterior.
+    # REGRA: o domínio corporativo pode ser omitido pelo usuário, mantendo
+    # a conveniência já existente sem deslocar essa regra para o frontend.
     email = (request.form.get("email") or "").strip().lower()
     senha = request.form.get("senha_hash") or ""
     if email and "@" not in email:
@@ -119,14 +118,8 @@ def cadastro():
         return redirect(url_for("auth.cadastro"))
 
     try:
-        usuario = Usuario(
-            nome=nome,
-            email=email,
-            senha_hash=generate_password_hash(senha),
-            telefone=telefone,
-            ATIVO="S",
-            ADM="N",
-        )
+        usuario = Usuario(nome=nome, email=email, senha_hash=generate_password_hash(senha),
+                          telefone=telefone, ATIVO="S", ADM="N")
         db.session.add(usuario)
         db.session.flush()
         db.session.add(Usurod(id=usuario.id, resp=usuario_rodopar))
@@ -143,7 +136,6 @@ def cadastro():
 # ============================================================
 # ROTA: SOLICITAÇÃO DE RECUPERAÇÃO
 # Gera token de curta duração sem revelar se um endereço existe na base.
-# O envio de e-mail permanece isolado da navegação das futuras camadas.
 # ============================================================
 @auth_bp.route("/esqueceu-senha", methods=["GET", "POST"])
 def recuperar_senha():
@@ -158,20 +150,15 @@ def recuperar_senha():
         usuario.token_expiracao = datetime.now() + timedelta(hours=1)
         db.session.commit()
         try:
-            msg = Message(
-                "Redefinição de Senha - Supersonic",
-                sender=os.getenv("EMAIL_USER", "sistema@ssonic.com.br"),
-                recipients=[email],
-            )
-            msg.body = (
-                f"Olá, {usuario.nome}.\n\n"
-                f"Seu código de recuperação é: {usuario.reset_token}\n"
-                "Este código expira em 1 hora."
-            )
+            msg = Message("Redefinição de Senha - Supersonic",
+                          sender=os.getenv("EMAIL_USER", "sistema@ssonic.com.br"),
+                          recipients=[email])
+            msg.body = (f"Olá, {usuario.nome}.\n\nSeu código de recuperação é: "
+                        f"{usuario.reset_token}\nEste código expira em 1 hora.")
             mail.send(msg)
         except Exception:
-            # A solicitação já foi registrada; o detalhe de transporte não deve
-            # expor a existência da conta nem interromper o fluxo da interface.
+            # O registro do token permanece; falhas de SMTP não devem revelar
+            # a existência da conta nem quebrar a navegação.
             pass
 
     flash("Se o e-mail estiver cadastrado, as instruções serão enviadas.", "info")
@@ -181,7 +168,6 @@ def recuperar_senha():
 @auth_bp.route("/sair")
 @login_required
 def sair():
-    # Encerramento centralizado da sessão para que futuras camadas não precisem
-    # conhecer detalhes internos do Flask-Login.
+    # Logout centralizado para que as futuras camadas não conheçam detalhes do Flask-Login.
     logout_user()
     return redirect(url_for("auth.index"))
