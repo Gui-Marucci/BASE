@@ -1,0 +1,30 @@
+/*
+MÓDULO: RAD SHELL
+Finalidade: concentrar apenas os ajustes estruturais da nova casca.
+A identidade Supersonic continua em geral.css e requerimentos.css; este arquivo
+não deve duplicar tokens visuais existentes.
+*/
+
+/* BLOCO: área inicial vazia — cria um ponto de extensão sem inventar conteúdo. */
+.rad-home-vazio {
+    min-height: calc(100vh - 150px);
+    display: grid;
+    place-items: center;
+}
+
+.rad-home-vazio__interno {
+    width: min(720px, 100%);
+    text-align: center;
+    padding: 48px 24px;
+}
+
+/* BLOCO: contenção responsiva — impede que a nova casca altere a leitura do módulo em telas menores. */
+.rad-content {
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .rad-home-vazio {
+        min-height: calc(100vh - 110px);
+    }
+}
