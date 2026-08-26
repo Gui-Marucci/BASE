@@ -1,0 +1,30 @@
+{#
+CAMADA 2 — INÍCIO
+Finalidade: fornecer a primeira tela após autenticação. Esta camada permanece
+intencionalmente vazia para receber as próximas funcionalidades sem acoplar a
+estrutura inicial ao conteúdo de módulos futuros.
+#}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - Supersonic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
+</head>
+<body>
+    {# CAMADA 3 — SIDEBAR: componente único para que alterações de navegação sejam refletidas em todas as telas que o incluírem. #}
+    {% include 'components/sidebar.html' %}
+
+    <main class="main-content">
+        {# ÁREA DE CONTEÚDO: propositalmente vazia nesta etapa; futuros módulos serão inseridos sem alterar o shell da navegação. #}
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{{ url_for('static', filename='js/menu-filter.js') }}"></script>
+    <script>
+        // INICIALIZAÇÃO: transforma os atributos data-lucide do componente compartilhado em ícones após a montagem da página.
+        lucide.createIcons();
+    </script>
+</body>
+</html>
