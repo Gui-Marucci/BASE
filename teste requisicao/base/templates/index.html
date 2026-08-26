@@ -1,0 +1,87 @@
+{#
+CAMADA 1 — INDEX / LOGIN
+A identidade visual segue o padrão Supersonic existente, porém a página foi
+isolada do restante da aplicação para que a autenticação não dependa de módulos.
+#}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Supersonic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
+</head>
+<body>
+    {# BLOCO: apresentação — permanece somente como identidade da Camada 1. #}
+    <section class="brand-section">
+        <div class="brand-overlay"></div>
+        <div class="brand-content">
+            <span class="brand-tag">Painel Supersonic</span>
+            <h1>Uma base modular para evoluir o sistema por camadas.</h1>
+            <p>A autenticação permanece isolada para que as próximas funcionalidades possam evoluir sem acoplamento.</p>
+        </div>
+    </section>
+
+    {# BLOCO: formulário — envia credenciais exclusivamente para o blueprint de autenticação. #}
+    <section class="form-section">
+        <div class="login-header">
+            <div class="logo-area">
+                <img src="{{ url_for('static', filename='img/logo.inicio.png') }}" alt="Logo Supersonic">
+            </div>
+            <div class="welcome-text">
+                <h2>Seja bem-vindo</h2>
+                <p>Insira suas credenciais para acessar o sistema.</p>
+            </div>
+        </div>
+
+        <form id="loginForm" action="{{ url_for('auth.login') }}" method="POST">
+            <div class="input-group">
+                <label for="email">E-mail Corporativo</label>
+                <div class="input-wrapper">
+                    <i data-lucide="mail" class="input-icon"></i>
+                    <input type="text" id="email" name="email" placeholder="seu e-mail@ssonic.com.br" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <div class="input-wrapper">
+                    <i data-lucide="lock" class="input-icon"></i>
+                    <input type="password" id="password" name="senha_hash" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="login-options">
+                <label><input type="checkbox"> Lembrar-me</label>
+                <a href="{{ url_for('auth.recuperar_senha') }}">Esqueceu a senha?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Acessar</button>
+        </form>
+
+        {% if erro %}
+        {# FEEDBACK: erro permanece próximo ao formulário para não deslocar o usuário para outra camada. #}
+        <div class="error-notification" role="alert">
+            <i data-lucide="alert-circle"></i>
+            <span>{{ erro }}</span>
+        </div>
+        {% endif %}
+
+        <div class="form-footer">
+            <p>© 2026 Supersonic Tecnologia.<br>Novo por aqui? <a href="{{ url_for('auth.cadastro') }}">Crie uma conta</a>.</p>
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // BLOCO: normalização do login — mantém a conveniência do domínio corporativo sem colocar regra de autenticação no navegador.
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            const campo = document.getElementById('email');
+            const valor = campo.value.trim();
+            if (valor && !valor.includes('@')) campo.value = valor + '@ssonic.com.br';
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>
