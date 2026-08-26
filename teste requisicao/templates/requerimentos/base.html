@@ -1,23 +1,26 @@
-{# ---------------------------------------------------------------------------
-   LAYOUT BASE DA ÁREA DE REQUERIMENTOS
-   Reaproveita geral.css (identidade visual existente) + requerimentos.css
-   (apenas os componentes novos). Sidebar e header são componentes.
---------------------------------------------------------------------------- #}
+{#
+LAYOUT: RAD SHELL
+Este layout substitui a antiga composição específica do dashboard por uma
+casca pequena e reutilizável. A autenticação, Lucide e a identidade visual
+existente continuam sendo fornecidas pelo projeto; a nova camada apenas
+organiza responsabilidades e reduz acoplamento entre páginas.
+#}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo_pagina or 'Requerimentos' }} - Supersonic</title>
+    <title>{{ titulo_pagina or 'Supersonic' }} - Supersonic</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/requerimentos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rad-shell.css') }}">
     {% block estilos %}{% endblock %}
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="tema-requerimentos">
+<body class="tema-requerimentos rad-shell">
 
     {% include 'components/sidebar.html' %}
 
@@ -25,7 +28,8 @@
         {% from 'components/header.html' import topbar with context %}
         {% call topbar(titulo_pagina) %}{% block header_acoes %}{% endblock %}{% endcall %}
 
-        <main class="content-area">
+        <main class="content-area rad-content">
+            {# FEEDBACK: mensagens continuam centralizadas para preservar o comportamento Flask existente. #}
             {% with mensagens = get_flashed_messages(with_categories=true) %}
                 {% if mensagens %}
                     <div class="flash-area">
@@ -37,10 +41,10 @@
             {% endwith %}
 
             {% block conteudo %}{% endblock %}
+            {% block content %}{% endblock %}
         </main>
     </div>
 
-    {# Área de toasts (feedback visual) e host de modais #}
     <div class="toast-area" id="toast-area" aria-live="polite"></div>
     <div class="modal-host" id="modal-host" hidden>
         <div class="modal-fundo" data-fechar-modal></div>
