@@ -1,0 +1,7 @@
+{# CAMADA 1 — RECUPERAÇÃO: solicita o fluxo sem conhecer a Camada 2 ou a sidebar. #}
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recuperar senha - Supersonic</title><link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}"></head>
+<body><section class="form-section"><div class="welcome-text"><h2>Recuperar senha</h2><p>Informe seu e-mail corporativo.</p></div>
+{% with mensagens = get_flashed_messages(with_categories=true) %}{% for categoria, mensagem in mensagens %}<div class="error-notification"><span>{{ mensagem }}</span></div>{% endfor %}{% endwith %}
+<form method="post" action="{{ url_for('auth.recuperar_senha') }}"><div class="input-group"><label>E-mail</label><input name="email" type="email" required></div><button type="submit" class="btn-login">Solicitar recuperação</button></form>
+<div class="form-footer"><a href="{{ url_for('auth.index') }}">Voltar ao login</a></div></section></body></html>
