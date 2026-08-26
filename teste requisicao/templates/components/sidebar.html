@@ -1,9 +1,9 @@
-{# ---------------------------------------------------------------------------
-   COMPONENTE: SIDEBAR
-   Mesma estrutura/classes já usadas no projeto (.sidebar, .nav-item, .active).
-   Só a nomenclatura dos itens foi ajustada para o domínio de Requerimentos.
-   Uso: {% include 'components/sidebar.html' %}  (variável: pagina_ativa)
---------------------------------------------------------------------------- #}
+{# ============================================================
+   ARQUITETURA RAD — NAVEGAÇÃO PRINCIPAL
+   OBJETIVO: deixar no MVP somente Início, Requerimentos e Perfil.
+   INTEGRAÇÃO: os nomes de endpoint existentes são preservados para não
+   quebrar autenticação, permissões ou o domínio de requerimentos.
+   ============================================================ #}
 <aside class="sidebar">
     <div class="sidebar-logo-container">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="sidebar-img">
@@ -14,37 +14,25 @@
     </div>
 
     <nav class="nav-menu">
-        <a href="{{ url_for('req.dashboard') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'dashboard' }}">
-            <i data-lucide="home"></i> Dashboard
+        {# BLOCO: entrada principal. O dashboard existente passa a funcionar como shell vazio. #}
+        <a href="{{ url_for('req.dashboard') }}" class="nav-item {{ 'active' if pagina_ativa == 'dashboard' }}">
+            <i data-lucide="home"></i> Início
         </a>
-        <a href="{{ url_for('req.dados_gerais') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'dados_gerais' }}">
-            <i data-lucide="database"></i> Dados Gerais
+
+        {# BLOCO: domínio central. Mantém o endpoint atual para preservar o serviço de requerimentos. #}
+        <a href="{{ url_for('req.lista') }}" class="nav-item {{ 'active' if pagina_ativa == 'requerimentos' }}">
+            <i data-lucide="clipboard-list"></i> Requisições
         </a>
-        <a href="{{ url_for('req.novo') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'novo' }}">
-            <i data-lucide="file-plus"></i> Novo Requerimento
-        </a>
-        <a href="{{ url_for('req.lista') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'requerimentos' }}">
-            <i data-lucide="clipboard-list"></i> Requerimentos
-        </a>
-        <a href="{{ url_for('comprovante') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'comprovante' }}">
-            <i data-lucide="receipt"></i> Comprovantes
-        </a>
-        <a href="{{ url_for('req.historico') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'historico' }}">
-            <i data-lucide="file-clock"></i> Histórico
-        </a>
-        <a href="{{ url_for('perfil') }}"
-           class="nav-item {{ 'active' if pagina_ativa == 'perfil' }}">
-            <i data-lucide="user"></i> Perfil
+
+        {# BLOCO: perfil. A rota existente continua responsável por diferenciar usuário e administrador. #}
+        <a href="{{ url_for('perfil') }}" class="nav-item {{ 'active' if pagina_ativa == 'perfil' }}">
+            <i data-lucide="user-round"></i> Perfil
         </a>
     </nav>
 
     <div class="sidebar-footer">
-        <a href="{{ url_for('sair') }}" class="nav-item"><i data-lucide="log-out"></i> Sair</a>
+        <a href="{{ url_for('sair') }}" class="nav-item">
+            <i data-lucide="log-out"></i> Sair
+        </a>
     </div>
 </aside>
