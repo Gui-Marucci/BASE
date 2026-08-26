@@ -1,0 +1,39 @@
+/* ============================================================
+   ARQUITETURA RAD — CAMADA VISUAL
+   BLOCO: estilos do shell e componentes mínimos do MVP.
+   INTEGRAÇÃO: geral.css continua sendo a base da identidade existente.
+   MANUTENÇÃO: novas telas devem preferir estes componentes antes de criar
+   estruturas paralelas.
+   ============================================================ */
+
+.rad-app { min-height: 100vh; background: var(--bg, #f6f8fb); }
+.rad-main { min-height: 100vh; margin-left: 260px; transition: margin-left .2s ease; }
+.rad-header { min-height: 82px; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px 32px; background:#fff; border-bottom:1px solid #e8edf3; }
+.rad-header h1 { margin:3px 0 0; font-size:1.45rem; }
+.rad-kicker { font-size:.7rem; letter-spacing:.14em; font-weight:700; opacity:.55; }
+.rad-user { display:flex; align-items:center; gap:10px; font-size:.9rem; font-weight:600; }
+.rad-avatar { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:#eef2f7; }
+.rad-content { padding:32px; }
+.rad-empty { min-height:calc(100vh - 180px); display:grid; place-items:center; text-align:center; color:#718096; }
+.rad-empty-box { max-width:560px; padding:48px; border:1px dashed #ccd5e0; border-radius:18px; background:#fff; }
+.rad-empty-box i { width:42px; height:42px; margin-bottom:14px; }
+.rad-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+.rad-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.rad-btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 15px; border-radius:9px; border:1px solid #d8e0e8; background:#fff; color:inherit; text-decoration:none; cursor:pointer; }
+.rad-btn-primary { background:#111827; color:#fff; border-color:#111827; }
+.rad-card { background:#fff; border:1px solid #e7ecf2; border-radius:14px; padding:20px; box-shadow:0 3px 12px rgba(15,23,42,.04); }
+.rad-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.rad-table-wrap { overflow:auto; background:#fff; border:1px solid #e7ecf2; border-radius:14px; }
+.rad-table { width:100%; border-collapse:collapse; }
+.rad-table th,.rad-table td { padding:13px 15px; text-align:left; border-bottom:1px solid #edf1f5; white-space:nowrap; }
+.rad-table th { font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:#64748b; }
+.rad-flashes { margin-bottom:18px; }
+.rad-flash { padding:12px 15px; border-radius:9px; margin-bottom:8px; background:#eef2f7; }
+.rad-flash-success { background:#eaf8ef; color:#176b38; }
+.rad-flash-danger { background:#fff0f0; color:#9b1c1c; }
+
+@media (max-width: 900px) {
+    .rad-main { margin-left:0; }
+    .rad-header,.rad-content { padding:18px; }
+    .rad-grid { grid-template-columns:1fr; }
+}
