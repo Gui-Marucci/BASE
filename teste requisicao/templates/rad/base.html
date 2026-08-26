@@ -1,0 +1,57 @@
+{# ============================================================
+   ARQUITETURA RAD — LAYOUT BASE
+   BLOCO: SHELL DA APLICAÇÃO
+   OBJETIVO: concentrar navegação, identidade visual e pontos de extensão
+   para que novas telas possam ser criadas sem duplicar estrutura.
+   INTEGRAÇÃO: mantém geral.css, identidade Supersonic e Lucide já utilizados.
+   ============================================================ #}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ titulo_pagina or 'Supersonic' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rad.css') }}">
+    {% block estilos %}{% endblock %}
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="rad-app">
+    {# COMPONENTE: navegação principal. Uma única fonte de verdade para as telas do MVP. #}
+    {% include 'components/sidebar.html' %}
+
+    <div class="rad-main">
+        {# COMPONENTE: cabeçalho contextual. O conteúdo muda por tela, o shell permanece. #}
+        <header class="rad-header">
+            <div>
+                <span class="rad-kicker">SUPERSONIC</span>
+                <h1>{{ titulo_pagina or 'Início' }}</h1>
+            </div>
+            <div class="rad-user">
+                <span class="rad-avatar">{{ user_iniciais or 'US' }}</span>
+                <span>{{ user_nome or 'Usuário' }}</span>
+            </div>
+        </header>
+
+        <main class="rad-content">
+            {# BLOCO: feedback. Mantém mensagens do Flask sem acoplar páginas à implementação. #}
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    <section class="rad-flashes" aria-live="polite">
+                        {% for categoria, mensagem in mensagens %}
+                            <div class="rad-flash rad-flash-{{ categoria }}">{{ mensagem }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+            {% block conteudo %}{% endblock %}
+        </main>
+    </div>
+
+    {# BLOCO: scripts compartilhados. O JavaScript específico entra no bloco scripts. #}
+    <script src="{{ url_for('static', filename='js/menu-filter.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rad.js') }}"></script>
+    {% block scripts %}{% endblock %}
+    <script>lucide.createIcons();</script>
+</body>
+</html>
