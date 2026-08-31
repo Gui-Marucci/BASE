@@ -12,6 +12,8 @@ from base.core.extensions import db, login_manager, mail
 from base.core.auth.models import Usuario
 from base.core.auth.routes import auth_bp
 from base.core.shell.routes import shell_bp
+from sqlalchemy.engine import URL
+
 
 load_dotenv()
 
@@ -28,27 +30,32 @@ app = Flask(
 )
 app.secret_key = os.getenv("SECRET_KEY", "chave_secreta_desenvolvimento")
 
-DB_USER = os.getenv("DB_USER")
+DB_USER = os.getenv("DB_USER", "sa")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = int(os.getenv("DB_PORT", "1433"))
+DB_NAME = os.getenv("DB_NAME", "Prev_Teste")
+DB_DRIVER = os.getenv("DB_DRIVER") or "ODBC Driver 17 for SQL Server"
 MODO_DEV = os.getenv("APP_MODO_DEV", "0").strip().lower() in {"1", "true"}
+print(
+    f"Banco: {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} | "
+    f"senha carregada: {'sim' if DB_PASSWORD else 'não'} | "
+    f"caracteres: {len(DB_PASSWORD)}"
+)
 
-if DB_USER and DB_HOST and DB_NAME:
-    from urllib.parse import quote_plus
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"mysql+pymysql://{DB_USER}:{quote_plus(DB_PASSWORD)}@"
-        f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
-elif MODO_DEV:
-    caminho = os.path.join(BASE_PATH, "storage", "base_dev.sqlite3")
-    os.makedirs(os.path.dirname(caminho), exist_ok=True)
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{caminho}"
-else:
-    raise RuntimeError(
-        "Configure DB_USER/DB_HOST/DB_NAME ou APP_MODO_DEV=1 para executar a base."
-    )
+url_banco = URL.create(
+    "mssql+pyodbc",
+    username=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=DB_PORT,
+    database=DB_NAME,
+    query={
+        "driver": DB_DRIVER,
+        "TrustServerCertificate": "yes",
+    },
+)
+app.config["SQLALCHEMY_DATABASE_URI"] = str(url_banco)
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAIL_SERVER"] = os.getenv("EMAIL_SMTP", "smtp.gmail.com")
@@ -75,10 +82,14 @@ login_manager.login_view = "auth.login"
 app.register_blueprint(auth_bp)
 app.register_blueprint(shell_bp)
 
-with app.app_context():
-    # Somente a camada de autenticação é materializada automaticamente em modo dev.
-    # Em produção, a estrutura do banco deve ser controlada por migrations.
-    db.create_all()
+CRIAR_TABELAS = os.getenv(
+    "APP_CRIAR_TABELAS",
+    "0",
+).strip().lower() in {"1", "true"}
+
+if CRIAR_TABELAS:
+    with app.app_context():
+        db.create_all()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5001")), debug=True)
