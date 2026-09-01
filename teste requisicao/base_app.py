@@ -7,7 +7,7 @@ construção progressiva das novas telas.
 
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, app
 from base.core.extensions import db, login_manager, mail
 from base.core.auth.models import Usuario
 from base.core.auth.routes import auth_bp
@@ -15,19 +15,16 @@ from base.core.shell.routes import shell_bp
 from sqlalchemy.engine import URL
 
 
-load_dotenv()
-
-# ============================================================
-# BLOCO: CONFIGURAÇÃO DA APLICAÇÃO BASE
-# Mantém o mesmo banco configurável do ambiente original, mas sem importar
-# rotas, serviços ou modelos funcionais do projeto legado.
-# ============================================================
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-app = Flask(
-    __name__,
-    template_folder="base/templates",
-    static_folder="static",
+
+ENV_PATH = os.path.join(
+    os.path.dirname(BASE_PATH),
+    ".env",
 )
+
+if not load_dotenv(ENV_PATH, override=True):
+    raise RuntimeError(f"Arquivo .env não encontrado: {ENV_PATH}")
+    
 app.secret_key = os.getenv("SECRET_KEY", "chave_secreta_desenvolvimento")
 
 DB_USER = os.getenv("DB_USER", "sa")
