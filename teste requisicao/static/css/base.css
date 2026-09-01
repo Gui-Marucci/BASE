@@ -1,0 +1,109 @@
+/*
+CAMADA 3 — ESTILO DO SHELL
+Este arquivo contém somente a estrutura visual adicionada pela nova base.
+A identidade existente continua disponível para a Camada 1; novos módulos
+não devem alterar este arquivo para resolver problemas específicos de conteúdo.
+*/
+
+/* BLOCO: shell principal — usa variáveis simples para facilitar futuras iterações da navegação. */
+:root {
+    --base-sidebar-width: 250px;
+    --base-sidebar-collapsed: 72px;
+    --base-content-min: 0;
+}
+
+/* BLOCO: sidebar — fixa a navegação sem impor dimensões ao conteúdo futuro. */
+.base-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--base-sidebar-width);
+    min-width: var(--base-sidebar-width);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+/* BLOCO: identidade — reserva uma área previsível para a marca sem misturar logo e navegação. */
+.base-sidebar__brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 88px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.base-sidebar__brand img {
+    max-width: 100%;
+    max-height: 52px;
+    object-fit: contain;
+}
+
+/* BLOCO: navegação — ocupa somente o espaço necessário e permite crescimento futuro. */
+.base-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+}
+
+.base-sidebar__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color .18s ease, color .18s ease;
+}
+
+.base-sidebar__item svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+}
+
+.base-sidebar__footer {
+    margin-top: auto;
+    padding: 12px;
+}
+
+/* BLOCO: conteúdo — começa depois da sidebar e permanece livre para as próximas camadas. */
+.base-page__content {
+    min-width: var(--base-content-min);
+    min-height: 100vh;
+    margin-left: var(--base-sidebar-width);
+    box-sizing: border-box;
+}
+
+/* BLOCO: adaptação mobile — a navegação ocupa toda a largura quando a tela não comporta o shell lateral. */
+@media (max-width: 768px) {
+    .base-sidebar {
+        width: var(--base-sidebar-collapsed);
+        min-width: var(--base-sidebar-collapsed);
+    }
+
+    .base-sidebar__brand {
+        padding: 10px;
+    }
+
+    .base-sidebar__brand img {
+        max-width: 44px;
+    }
+
+    .base-sidebar__item {
+        justify-content: center;
+        padding-inline: 10px;
+    }
+
+    .base-sidebar__item span {
+        display: none;
+    }
+
+    .base-page__content {
+        margin-left: var(--base-sidebar-collapsed);
+    }
+}

@@ -1,0 +1,27 @@
+{#
+CAMADA 2 — INÍCIO
+Página deliberadamente vazia. A única composição funcional nesta etapa é a
+Camada 3, permitindo que novas telas sejam adicionadas sem reconstruir o shell.
+#}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - Supersonic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geral.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
+<body class="base-page">
+    {% include 'components/sidebar.html' %}
+
+    {# BLOCO: superfície de conteúdo — não contém cards, dashboards ou módulos nesta iteração. #}
+    <main class="base-page__content" aria-label="Conteúdo principal"></main>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // INICIALIZAÇÃO: ativa os ícones da sidebar depois que o componente compartilhado foi inserido no DOM.
+        lucide.createIcons();
+    </script>
+</body>
+</html>

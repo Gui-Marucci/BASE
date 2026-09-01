@@ -1,0 +1,28 @@
+{#
+CAMADA 3 — SIDEBAR GLOBAL
+Componente único de navegação. Qualquer alteração de estrutura, item ou estado
+visual deve ser feita neste arquivo para propagar a mudança às páginas que o incluem.
+#}
+<aside class="base-sidebar" data-base-sidebar>
+    {# BLOCO: identidade — o logo permanece separado da navegação para permitir troca sem alterar os links. #}
+    <div class="base-sidebar__brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Supersonic">
+    </div>
+
+    {# BLOCO: navegação — nesta etapa somente a Camada 2 é interativa; os demais módulos serão adicionados em iterações futuras. #}
+    <nav class="base-sidebar__nav" aria-label="Navegação principal">
+        <a href="{{ url_for('shell.inicio') }}"
+           class="base-sidebar__item {{ 'is-active' if pagina_ativa == 'inicio' }}">
+            <i data-lucide="home"></i>
+            <span>Início</span>
+        </a>
+    </nav>
+
+    {# BLOCO: sessão — logout pertence à camada de autenticação, mas é exposto pelo shell compartilhado. #}
+    <div class="base-sidebar__footer">
+        <a href="{{ url_for('auth.sair') }}" class="base-sidebar__item">
+            <i data-lucide="log-out"></i>
+            <span>Sair</span>
+        </a>
+    </div>
+</aside>
